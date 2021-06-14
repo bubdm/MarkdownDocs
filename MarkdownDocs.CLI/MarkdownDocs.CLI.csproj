@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <UseWpf>true</UseWpf>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>mdocs</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Title>MarkdownDocs</Title>
+    <Description>Markdown generator for .NET projects</Description>
+    <Authors>miroiu</Authors>
+    <Copyright>Miroiu Emanuel</Copyright>
+    <PackageTags>markdown documentation generator csharp</PackageTags>
+    <PackageProjectUrl>https://github.com/miroiu/MarkdownDocs</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Nullable>enable</Nullable>
+    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarkdownDocs\MarkdownDocs.csproj" />
+  </ItemGroup>
+
+</Project>
