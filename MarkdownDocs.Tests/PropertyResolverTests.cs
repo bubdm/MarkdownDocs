@@ -6,7 +6,7 @@ namespace MarkdownDocs.Tests
 {
     public class PropertyResolverTests
     {
-        private readonly IMetadataBuilder _metadata = new MetaBuilderStub();
+        private readonly IAssemblyMetadata _metadata = new AssemblyMetadataStub();
 
         [Fact]
         public void TestReferences()

@@ -7,11 +7,11 @@ namespace MarkdownDocs
 {
     public class DocsWriter : IDocsWriter
     {
-        private readonly MarkdownWriter _markdownWriter;
+        private readonly IMarkdownWriter _markdownWriter;
 
-        public DocsWriter(MarkdownWriter markdownWriter) => _markdownWriter = markdownWriter;
+        public DocsWriter(IMarkdownWriter markdownWriter) => _markdownWriter = markdownWriter;
 
-        public async Task WriteAsync(AssemblyMetadata metadata, DocsOptions options, CancellationToken cancellationToken)
+        public async Task WriteAsync(IAssemblyMetadata metadata, DocsOptions options, CancellationToken cancellationToken)
         {
 
         }

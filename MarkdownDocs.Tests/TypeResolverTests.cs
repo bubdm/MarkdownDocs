@@ -36,13 +36,13 @@ namespace MarkdownDocs.Tests
 
     public class TypeResolverTests
     {
-        private readonly IMetadataBuilder _metadata = new MetaBuilderStub();
+        private readonly IAssemblyMetadata _metadata = new AssemblyMetadataStub();
 
         [Fact]
         public void TestBoolType()
         {
             Type type = typeof(bool);
-            TypeMetadata meta = _metadata.RegisterType(type);
+            ITypeMetadata meta = _metadata.Type(type);
 
             Assert.Equal(type.Name, meta.Name);
             Assert.Equal(type.Namespace, meta.Namespace);
@@ -56,7 +56,7 @@ namespace MarkdownDocs.Tests
         public void TestEnumType()
         {
             Type type = typeof(TestEnum);
-            TypeMetadata meta = _metadata.RegisterType(type);
+            ITypeMetadata meta = _metadata.Type(type);
 
             Assert.Equal(type.Name, meta.Name);
             Assert.Equal(type.Namespace, meta.Namespace);
@@ -69,21 +69,20 @@ namespace MarkdownDocs.Tests
         [Fact]
         public void TestInheritance()
         {
-            TypeMetadata meta = _metadata.RegisterType(typeof(DerivedClass));
+            ITypeMetadata meta = _metadata.Type(typeof(DerivedClass));
 
-            Assert.Contains(_metadata.RegisterType(typeof(BaseClass)), meta.Inherited);
-            Assert.Contains(_metadata.RegisterType(typeof(IDerived)), meta.Inherited);
-            Assert.DoesNotContain(_metadata.RegisterType(typeof(IBase)), meta.Inherited);
+            Assert.Contains(_metadata.Type(typeof(BaseClass)), meta.Inherited);
+            Assert.Contains(_metadata.Type(typeof(IDerived)), meta.Inherited);
+            Assert.DoesNotContain(_metadata.Type(typeof(IBase)), meta.Inherited);
             Assert.Empty(meta.Derived);
         }
 
         [Fact]
         public void TestDerived()
         {
-            TypeMetadata derived = _metadata.RegisterType(typeof(DerivedClass));
-            TypeMetadata meta = _metadata.RegisterType(typeof(BaseClass));
+            ITypeMetadata meta = _metadata.Type(typeof(BaseClass));
 
-            Assert.Contains(_metadata.RegisterType(typeof(DerivedClass)), meta.Derived);
+            Assert.Contains(_metadata.Type(typeof(DerivedClass)), meta.Derived);
         }
     }
 }

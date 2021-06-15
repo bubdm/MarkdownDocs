@@ -8,39 +8,34 @@ using System.Threading.Tasks;
 
 namespace MarkdownDocs.Resolver
 {
-    public static class AssemblyResolverExtensions
-    {
-        public static TypeMetadata RegisterType(this IMetadataBuilder builder, Type type) => builder.Type(type.GetHashCode()).From(builder, type);
-    }
-
     public class AssemblyResolver : IAssemblyResolver
     {
-        private readonly IMetadataBuilder _metaBuilder;
+        private readonly IAssemblyMetadata _assemblyRef;
 
-        public AssemblyResolver(IMetadataBuilder metaBuilder)
+        public AssemblyResolver(IAssemblyMetadata aseemblyRef)
         {
-            _metaBuilder = metaBuilder;
+            _assemblyRef = aseemblyRef;
 
-            _metaBuilder.RegisterType(typeof(object));
-            _metaBuilder.RegisterType(typeof(bool));
-            _metaBuilder.RegisterType(typeof(double));
-            _metaBuilder.RegisterType(typeof(int));
-            _metaBuilder.RegisterType(typeof(string));
+            _assemblyRef.Type(typeof(object));
+            _assemblyRef.Type(typeof(bool));
+            _assemblyRef.Type(typeof(double));
+            _assemblyRef.Type(typeof(int));
+            _assemblyRef.Type(typeof(string));
         }
 
-        public async Task<AssemblyMetadata> ResolveAsync(string path, CancellationToken cancellationToken)
+        public async Task<IAssemblyMetadata> ResolveAsync(string path, CancellationToken cancellationToken)
         {
             Assembly? dll = Assembly.LoadFrom(path);
 
             IEnumerable<Task> tasks = dll.ExportedTypes.Select(type => VisitTypeAsync(type, cancellationToken));
             await Task.WhenAll(tasks);
 
-            return _metaBuilder.Build();
+            return _assemblyRef;
         }
 
         private async Task VisitTypeAsync(Type type, CancellationToken cancellationToken)
         {
-            TypeMetadata typeRef = _metaBuilder.RegisterType(type);
+            TypeMetadata typeRef = _assemblyRef.Type(type);
 
             var tasks = new List<Task>
             {

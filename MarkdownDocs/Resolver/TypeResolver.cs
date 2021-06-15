@@ -7,8 +7,10 @@ namespace MarkdownDocs.Resolver
 {
     public static class TypeResolver
     {
-        public static TypeMetadata From(this TypeMetadata meta, in IMetadataBuilder metadata, in Type type)
+        public static TypeMetadata Type(this IAssemblyMetadata metadata, in Type type)
         {
+            TypeMetadata meta = metadata.Type(type.GetHashCode());
+
             meta.Name = type.Name;
             meta.Namespace = type.Namespace;
             meta.Assembly = type.Module.Name;
@@ -16,17 +18,17 @@ namespace MarkdownDocs.Resolver
             meta.Category = type.GetCategory();
             meta.Modifier = type.GetModifier();
 
-            var interfaces = type.GetImmediateInterfaces();
+            IEnumerable<Type> interfaces = type.GetImmediateInterfaces();
             foreach (Type interf in interfaces)
             {
-                var interfMeta = metadata.RegisterType(interf);
+                TypeMetadata interfMeta = metadata.Type(interf);
                 meta.Implement(interfMeta);
             }
 
             Type? baseType = type.BaseType;
             if (baseType != null)
             {
-                var baseMeta = metadata.RegisterType(baseType);
+                TypeMetadata baseMeta = metadata.Type(baseType);
                 meta.Inherit(baseMeta);
             }
 

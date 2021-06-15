@@ -22,7 +22,7 @@ namespace MarkdownDocs.Metadata
     }
 
     [DebuggerDisplay("{Namespace + \".\" + Name}")]
-    public class TypeMetadata
+    public class TypeMetadata : ITypeMetadata, ITypeBuilder
     {
         private readonly Dictionary<int, PropertyMetadata> _properties = new Dictionary<int, PropertyMetadata>();
         private readonly HashSet<TypeMetadata> _inherited = new HashSet<TypeMetadata>();
