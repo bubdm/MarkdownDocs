@@ -17,7 +17,7 @@ namespace MarkdownDocs.Markdown
         public async Task WriteAsync(IAssemblyMetadata assembly, DocsOptions options, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            IEnumerable<TypeMetadata> exportedTypes = assembly.Types.Where(t => t.Assembly == assembly.Name);
+            IEnumerable<ITypeMetadata> exportedTypes = assembly.Types.Where(t => t.Assembly == assembly.Name);
 
             if (options.IsCompact)
             {
@@ -30,7 +30,7 @@ namespace MarkdownDocs.Markdown
                     IMarkdownWriter writer = _writerFactory(stream);
                     await using (writer.ConfigureAwait(false))
                     {
-                        foreach (TypeMetadata type in exportedTypes)
+                        foreach (ITypeMetadata type in exportedTypes)
                         {
                             await type.WriteAsync(writer, cancellationToken).ConfigureAwait(false);
                         }
@@ -46,7 +46,7 @@ namespace MarkdownDocs.Markdown
                 }
                 else
                 {
-                    foreach (TypeMetadata type in exportedTypes)
+                    foreach (ITypeMetadata type in exportedTypes)
                     {
                         await WriteTypeToFileAsync(options.OutputPath, type, cancellationToken).ConfigureAwait(false);
                     }
@@ -54,7 +54,7 @@ namespace MarkdownDocs.Markdown
             }
         }
 
-        private async Task WriteTypeToFileAsync(string outputPath, TypeMetadata type, CancellationToken cancellationToken)
+        private async Task WriteTypeToFileAsync(string outputPath, ITypeMetadata type, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 

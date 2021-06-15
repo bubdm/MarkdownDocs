@@ -82,7 +82,7 @@ namespace MarkdownDocs.Resolver
                 return TypeCategory.Class;
             }
 
-            return TypeCategory.None;
+            return TypeCategory.Unknown;
         }
 
         public static TypeModifier GetModifier(this Type type)

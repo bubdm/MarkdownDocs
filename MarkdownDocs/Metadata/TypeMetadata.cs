@@ -5,7 +5,7 @@ namespace MarkdownDocs.Metadata
 {
     public enum TypeCategory
     {
-        None,
+        Unknown,
         Enum,
         Interface,
         Struct,
@@ -25,13 +25,14 @@ namespace MarkdownDocs.Metadata
     public class TypeMetadata : ITypeMetadata, ITypeBuilder
     {
         private readonly Dictionary<int, PropertyMetadata> _properties = new Dictionary<int, PropertyMetadata>();
-        private readonly HashSet<TypeMetadata> _inherited = new HashSet<TypeMetadata>();
-        private readonly HashSet<TypeMetadata> _derived = new HashSet<TypeMetadata>();
-        private readonly HashSet<TypeMetadata> _references = new HashSet<TypeMetadata>();
+        private readonly HashSet<ITypeMetadata> _implemented = new HashSet<ITypeMetadata>();
+        private readonly HashSet<ITypeMetadata> _derived = new HashSet<ITypeMetadata>();
+        private readonly HashSet<ITypeMetadata> _references = new HashSet<ITypeMetadata>();
 
-        public IEnumerable<TypeMetadata> Inherited => _inherited;
-        public IEnumerable<TypeMetadata> Derived => _derived;
-        public IEnumerable<TypeMetadata> References => _references;
+        public ITypeMetadata? Inherited { get; private set; }
+        public IEnumerable<ITypeMetadata> Implemented => _implemented;
+        public IEnumerable<ITypeMetadata> Derived => _derived;
+        public IEnumerable<ITypeMetadata> References => _references;
 
         public int Id { get; private set; }
         public string Name { get; set; } = default!;
@@ -49,11 +50,15 @@ namespace MarkdownDocs.Metadata
 
         public void Inherit(TypeMetadata type)
         {
-            _inherited.Add(type);
+            Inherited = type;
             type.Derive(this);
         }
 
-        public void Implement(TypeMetadata type) => Inherit(type);
+        public void Implement(TypeMetadata type)
+        {
+            _implemented.Add(type);
+            type.Derive(this);
+        }
 
         protected void Derive(TypeMetadata type) => _derived.Add(type);
 

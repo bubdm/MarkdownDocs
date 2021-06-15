@@ -24,7 +24,7 @@ namespace MarkdownDocs.Tests
 
     class BaseClass : IBase
     {
-        public BaseClass Root { get; set; }
+        public BaseClass? Root { get; set; }
     }
 
     class DerivedClass : BaseClass, IDerived
@@ -71,9 +71,9 @@ namespace MarkdownDocs.Tests
         {
             ITypeMetadata meta = _metadata.Type(typeof(DerivedClass));
 
-            Assert.Contains(_metadata.Type(typeof(BaseClass)), meta.Inherited);
-            Assert.Contains(_metadata.Type(typeof(IDerived)), meta.Inherited);
-            Assert.DoesNotContain(_metadata.Type(typeof(IBase)), meta.Inherited);
+            Assert.Same(_metadata.Type(typeof(BaseClass)), meta.Inherited);
+            Assert.Contains(_metadata.Type(typeof(IDerived)), meta.Implemented);
+            Assert.DoesNotContain(_metadata.Type(typeof(IBase)), meta.Implemented);
             Assert.Empty(meta.Derived);
         }
 

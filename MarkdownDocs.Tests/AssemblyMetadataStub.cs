@@ -6,7 +6,7 @@ namespace MarkdownDocs.Tests
     class AssemblyMetadataStub : IAssemblyMetadata, IAssemblyBuilder
     {
         private readonly Dictionary<int, TypeMetadata> _types = new Dictionary<int, TypeMetadata>();
-        public IEnumerable<TypeMetadata> Types => _types.Values;
+        public IEnumerable<ITypeMetadata> Types => _types.Values;
 
         public string? Name { get; private set; }
 

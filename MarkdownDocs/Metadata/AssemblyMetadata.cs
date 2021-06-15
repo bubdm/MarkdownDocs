@@ -9,7 +9,7 @@ namespace MarkdownDocs.Metadata
         private readonly ConcurrentDictionary<int, TypeMetadata> _types = new ConcurrentDictionary<int, TypeMetadata>(64, 64);
         private readonly Func<int, TypeMetadata> _typeFactory = (id) => new TypeMetadata(id);
         
-        public IEnumerable<TypeMetadata> Types => _types.Values;
+        public IEnumerable<ITypeMetadata> Types => _types.Values;
         public string? Name { get; private set; } = "UNKNOWN";
 
         public TypeMetadata Type(int id) => _types.GetOrAdd(id, _typeFactory);

@@ -6,6 +6,6 @@ namespace MarkdownDocs.Metadata
     {
         public string? Name { get; }
 
-        IEnumerable<TypeMetadata> Types { get; }
+        IEnumerable<ITypeMetadata> Types { get; }
     }
 }
