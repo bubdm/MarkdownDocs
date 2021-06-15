@@ -8,10 +8,13 @@ namespace MarkdownDocs.Markdown
 
         public static string Bold(this string text) => $"**{text.Trim()}**";
 
-        public static string Link(this string text, string url) => $"[{text}]({url})";
+        public static string Link(this string text, in string url) => $"[{text}]({url})";
 
-        public static string Link(this ITypeMetadata type, ITypeMetadata root, bool displayNamespace = false)
+        public static string Link(this ITypeMetadata type, in ITypeMetadata root, in IDocsOptions options)
         {
+            bool displayNamespace = false; // TODO: #1 use value from options
+            string baseUrl = ""; // TODO: #1 use value from options
+
             string fullName = GetFullName(type);
             string result = displayNamespace ? fullName : type.Name;
 
@@ -20,8 +23,14 @@ namespace MarkdownDocs.Markdown
                 return result.Link($"{MicrosoftDocsUrl}{fullName}");
             }
 
+            if (options.IsCompact)
+            {
+                return result.Link($"#{type.Name}-{type.Category}".ToLowerInvariant());
+            }
+
             string[] path = fullName.Split(".");
             string link = string.Join("/", path);
+            link = string.IsNullOrWhiteSpace(baseUrl) ? link : $"{baseUrl}/{link}";
 
             if (displayNamespace && type.Namespace != root.Namespace)
             {

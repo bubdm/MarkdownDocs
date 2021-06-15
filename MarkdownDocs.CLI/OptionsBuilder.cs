@@ -12,7 +12,7 @@ namespace MarkdownDocs.CLI
         public static string FileDoesNotExist { get; } = "File '{0}' does not exist.";
         public static string ParallelNotAllowedWithCompact { get; } = "Compact mode does not work with parallel writes.";
 
-        public DocsOptions? Options { get; set; }
+        public IDocsOptions? Options { get; set; }
 
         private readonly List<string> _errors = new List<string>();
         public IReadOnlyCollection<string> Errors => _errors;

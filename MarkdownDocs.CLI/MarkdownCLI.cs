@@ -18,9 +18,9 @@ namespace MarkdownDocs.CLI
         private readonly IAssemblyResolver _assemblyVisitor;
         private readonly IDocsWriter _docsWriter;
 
-        public DocsOptions Options { get; }
+        public IDocsOptions Options { get; }
 
-        private MarkdownCLI(DocsOptions options, IAssemblyResolver assemblyVisitor, IDocsWriter docsWriter)
+        private MarkdownCLI(IDocsOptions options, IAssemblyResolver assemblyVisitor, IDocsWriter docsWriter)
         {
             Options = options;
             _assemblyVisitor = assemblyVisitor;
@@ -34,15 +34,17 @@ namespace MarkdownDocs.CLI
             await _docsWriter.WriteAsync(metadata, Options, cancellationToken).ConfigureAwait(false);
         }
 
-        public static IMarkdownCLI New(DocsOptions options)
+        public static IMarkdownCLI New(IDocsOptions options)
         {
             var assemblyMeta = new AssemblyMetadata();
             var assemblyVisitor = new AssemblyResolver(assemblyMeta);
 
-            static IMarkdownWriter WriterFactory(StreamWriter stream) => new MarkdownWriter(stream);
-            var docsWriter = new DocsWriter(WriterFactory);
+            var docsWriter = new DocsWriter(WriterFactory, TypeWriterFactory);
 
             return new MarkdownCLI(options, assemblyVisitor, docsWriter);
+
+            static IMarkdownWriter WriterFactory(StreamWriter stream) => new MarkdownWriter(stream);
+            IMarkdownWriterAsync<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new MarkdownTypeWriter(writer, options);
         }
     }
 }

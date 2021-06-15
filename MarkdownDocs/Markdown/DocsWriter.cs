@@ -10,9 +10,14 @@ namespace MarkdownDocs.Markdown
 {
     public class DocsWriter : IDocsWriter
     {
-        private readonly Func<StreamWriter, IMarkdownWriter> _writerFactory;
+        private readonly Func<StreamWriter, IMarkdownWriter> _mdWriterFactory;
+        private readonly Func<IMarkdownWriter, IMarkdownWriterAsync<ITypeMetadata>> _typeWriterFactory;
 
-        public DocsWriter(Func<StreamWriter, IMarkdownWriter> writerFactory) => _writerFactory = writerFactory;
+        public DocsWriter(Func<StreamWriter, IMarkdownWriter> mdWriterFactory, Func<IMarkdownWriter, IMarkdownWriterAsync<ITypeMetadata>> typeWriterFactory)
+        {
+            _mdWriterFactory = mdWriterFactory;
+            _typeWriterFactory = typeWriterFactory;
+        }
 
         public async Task WriteAsync(IAssemblyMetadata assembly, IDocsOptions options, CancellationToken cancellationToken)
         {
@@ -27,12 +32,13 @@ namespace MarkdownDocs.Markdown
                 var stream = new StreamWriter(options.OutputPath);
                 await using (stream.ConfigureAwait(false))
                 {
-                    IMarkdownWriter writer = _writerFactory(stream);
+                    IMarkdownWriter writer = _mdWriterFactory(stream);
                     await using (writer.ConfigureAwait(false))
                     {
+                        IMarkdownWriterAsync<ITypeMetadata> typeWriter = _typeWriterFactory(writer);
                         foreach (ITypeMetadata type in exportedTypes)
                         {
-                            await type.WriteAsync(writer, cancellationToken).ConfigureAwait(false);
+                            await typeWriter.WriteAsync(type, cancellationToken).ConfigureAwait(false);
                         }
                     }
                 }
@@ -68,10 +74,10 @@ namespace MarkdownDocs.Markdown
             var stream = new StreamWriter(outputFilePath);
             await using (stream.ConfigureAwait(false))
             {
-                IMarkdownWriter writer = _writerFactory(stream);
+                IMarkdownWriter writer = _mdWriterFactory(stream);
                 await using (writer.ConfigureAwait(false))
                 {
-                    await type.WriteAsync(writer, cancellationToken).ConfigureAwait(false);
+                    await _typeWriterFactory(writer).WriteAsync(type, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
