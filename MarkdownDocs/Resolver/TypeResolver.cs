@@ -5,37 +5,51 @@ using System.Reflection;
 
 namespace MarkdownDocs.Resolver
 {
-    public static class TypeResolver
+    public interface IResolver<TResult, TValue>
     {
-        public static TypeMetadata Type(this IAssemblyBuilder builder, in Type type)
+        TResult Resolve(in TValue value);
+    }
+
+    public class TypeResolver : IResolver<ITypeMetadata, Type>
+    {
+        private readonly IAssemblyBuilder _builder;
+
+        public TypeResolver(in IAssemblyBuilder builder)
         {
-            TypeMetadata meta = builder.Type(type.GetHashCode());
+            _builder = builder;
+        }
+
+        public ITypeMetadata Resolve(in Type type) => ResolveImpl(type);
+
+        private TypeMetadata ResolveImpl(in Type type)
+        {
+            TypeMetadata meta = _builder.Type(type.GetHashCode());
 
             meta.Name = type.Name;
             meta.Namespace = type.Namespace;
             meta.Assembly = type.Assembly.GetName().Name;
             meta.IsMicrosoftType = IsMicrosoftType(type);
-            meta.Category = type.GetCategory();
-            meta.Modifier = type.GetModifier();
+            meta.Category = GetCategory(type);
+            meta.Modifier = GetModifier(type);
 
-            IEnumerable<Type> interfaces = type.GetImmediateInterfaces();
+            IEnumerable<Type> interfaces = GetImmediateInterfaces(type);
             foreach (Type interf in interfaces)
             {
-                TypeMetadata interfMeta = builder.Type(interf);
+                TypeMetadata interfMeta = ResolveImpl(interf);
                 meta.Implement(interfMeta);
             }
 
             Type? baseType = type.BaseType;
             if (baseType != null)
             {
-                TypeMetadata baseMeta = builder.Type(baseType);
+                TypeMetadata baseMeta = ResolveImpl(baseType);
                 meta.Inherit(baseMeta);
             }
 
             return meta;
         }
 
-        private static IEnumerable<Type> GetImmediateInterfaces(this Type type)
+        private static IEnumerable<Type> GetImmediateInterfaces(Type type)
         {
             Type[] interfaces = type.GetInterfaces();
             var result = new HashSet<Type>(interfaces);
@@ -55,7 +69,7 @@ namespace MarkdownDocs.Resolver
             return result;
         }
 
-        public static TypeCategory GetCategory(this Type type)
+        public static TypeCategory GetCategory(Type type)
         {
             if (type.IsEnum)
             {
@@ -85,7 +99,7 @@ namespace MarkdownDocs.Resolver
             return TypeCategory.Unknown;
         }
 
-        public static TypeModifier GetModifier(this Type type)
+        public static TypeModifier GetModifier(Type type)
         {
             if (type.IsAbstract && type.IsSealed)
             {
@@ -105,7 +119,7 @@ namespace MarkdownDocs.Resolver
             return TypeModifier.None;
         }
 
-        public static bool IsMicrosoftType(this Type type)
+        public static bool IsMicrosoftType(Type type)
         {
             var attribute = type.Assembly.GetCustomAttribute<AssemblyCompanyAttribute>();
             return attribute?.Company.Contains("Microsoft Corporation", StringComparison.OrdinalIgnoreCase) ?? false;

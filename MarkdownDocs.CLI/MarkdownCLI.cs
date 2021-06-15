@@ -37,7 +37,7 @@ namespace MarkdownDocs.CLI
         public static IMarkdownCLI New(IDocsOptions options)
         {
             var assemblyMeta = new AssemblyMetadata();
-            var assemblyVisitor = new AssemblyResolver(assemblyMeta);
+            var assemblyVisitor = new AssemblyResolver(assemblyMeta, new TypeResolver(assemblyMeta));
 
             var docsWriter = new DocsWriter(WriterFactory, TypeWriterFactory);
 

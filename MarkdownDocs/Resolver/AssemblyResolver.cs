@@ -11,16 +11,18 @@ namespace MarkdownDocs.Resolver
     public class AssemblyResolver : IAssemblyResolver
     {
         private readonly IAssemblyBuilder _assemblyBuilder;
+        private readonly IResolver<ITypeMetadata, Type> _typeResolver;
 
-        public AssemblyResolver(IAssemblyBuilder assemblyBuilder)
+        public AssemblyResolver(IAssemblyBuilder assemblyBuilder, IResolver<ITypeMetadata, Type> typeResolver)
         {
             _assemblyBuilder = assemblyBuilder;
+            _typeResolver = typeResolver;
 
-            _assemblyBuilder.Type(typeof(object));
-            _assemblyBuilder.Type(typeof(bool));
-            _assemblyBuilder.Type(typeof(double));
-            _assemblyBuilder.Type(typeof(int));
-            _assemblyBuilder.Type(typeof(string));
+            _typeResolver.Resolve(typeof(object));
+            _typeResolver.Resolve(typeof(bool));
+            _typeResolver.Resolve(typeof(double));
+            _typeResolver.Resolve(typeof(int));
+            _typeResolver.Resolve(typeof(string));
         }
 
         public async Task<IAssemblyMetadata> ResolveAsync(IDocsOptions options, CancellationToken cancellationToken)
@@ -38,7 +40,7 @@ namespace MarkdownDocs.Resolver
         private async Task ResolveTypeAsync(Type type, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            TypeMetadata typeRef = _assemblyBuilder.Type(type);
+            ITypeMetadata typeRef = _typeResolver.Resolve(type);
 
             var tasks = new List<Task>
             {
@@ -46,7 +48,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (ConstructorInfo ctor in type.GetConstructors())
                     {
-                        _assemblyBuilder.Constructor(typeRef, ctor);
+                        //_assemblyBuilder.Constructor(typeRef, ctor);
                     }
                 }, cancellationToken),
 
@@ -54,7 +56,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (FieldInfo field in type.GetFields())
                     {
-                        _assemblyBuilder.Field(typeRef, field);
+                        //_assemblyBuilder.Field(typeRef, field);
                     }
                 }, cancellationToken),
 
@@ -62,7 +64,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (PropertyInfo property in type.GetProperties())
                     {
-                        _assemblyBuilder.Property(typeRef, property);
+                        //_assemblyBuilder.Property(typeRef, property);
                     }
                 }, cancellationToken),
 
@@ -70,7 +72,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (MethodInfo method in type.GetMethods())
                     {
-                       _assemblyBuilder.Method(typeRef, method);
+                       //_assemblyBuilder.Method(typeRef, method);
                     }
                 }, cancellationToken),
 
@@ -78,7 +80,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (EventInfo ev in type.GetEvents())
                     {
-                        _assemblyBuilder.Event(typeRef, ev);
+                        //_assemblyBuilder.Event(typeRef, ev);
                     }
                 }, cancellationToken)
             };
