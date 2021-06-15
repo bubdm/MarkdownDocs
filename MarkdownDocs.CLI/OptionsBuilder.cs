@@ -10,8 +10,9 @@ namespace MarkdownDocs.CLI
         public static string InvalidFileExtension { get; } = "File '{0}' must have one of the following extensions: {1}.";
         public static string MissingOutputPath { get; } = "Missing output path.";
         public static string FileDoesNotExist { get; } = "File '{0}' does not exist.";
+        public static string ParallelNotAllowedWithCompact { get; } = "Compact mode does not work with parallel writes.";
 
-        public Options? Options { get; set; }
+        public DocsOptions? Options { get; set; }
 
         private readonly List<string> _errors = new List<string>();
         public IReadOnlyCollection<string> Errors => _errors;
@@ -62,18 +63,28 @@ namespace MarkdownDocs.CLI
             {
                 CommandOption? noxml = ParseCommand("-nx") ?? ParseCommand("--noxml");
                 CommandOption? compact = ParseCommand("-c") ?? ParseCommand("--compact");
+                CommandOption? parallelWrites = ParseCommand("-pw") ?? ParseCommand("--parallel-writes");
                 bool isCompact = compact != null;
+                bool pw = parallelWrites != null;
+                bool useXml = noxml == null;
 
-                string inputPath = Path.GetFullPath(fileName);
-                string outputPath = Path.GetFullPath(output!.Argument!) ?? Directory.GetCurrentDirectory();
-
-                if (isCompact && !Path.HasExtension(outputPath))
+                if (pw && isCompact)
                 {
-                    outputPath = Path.Join(outputPath, Path.ChangeExtension(Path.GetFileName(inputPath), _markdownExtension));
+                    result.AddError(OptionsBuilderResult.ParallelNotAllowedWithCompact);
                 }
 
-                var options = new Options(inputPath, outputPath, isCompact, noxml != null);
-                result.Options = options;
+                if (result.IsValid)
+                {
+                    string inputPath = Path.GetFullPath(fileName);
+                    string outputPath = Path.GetFullPath(output!.Argument!) ?? Directory.GetCurrentDirectory();
+
+                    if (isCompact && !Path.HasExtension(outputPath))
+                    {
+                        outputPath = Path.Join(outputPath, Path.ChangeExtension(Path.GetFileName(inputPath), _markdownExtension));
+                    }
+
+                    result.Options = new DocsOptions(inputPath, outputPath, isCompact, useXml, pw);
+                }
             }
 
             return result;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarkdownDocs.CLI
@@ -17,7 +18,15 @@ namespace MarkdownDocs.CLI
             var result = new OptionsBuilder(args).Build();
             if (result.IsValid)
             {
-                await MarkdownCLI.New(result.Options!).WriteDocsAsync();
+                try
+                {
+                    // Consider adding a --timeout option to cancel token
+                    await MarkdownCLI.New(result.Options!).WriteDocsAsync(CancellationToken.None).ConfigureAwait(false);
+                }
+                catch (TaskCanceledException)
+                {
+                    Console.WriteLine("Writing was cancelled.");
+                }
             }
             else
             {
@@ -28,7 +37,7 @@ namespace MarkdownDocs.CLI
 
         public static void PrintHelp()
         {
-            Console.WriteLine("markdown input -o output [--compact] [--noxml]");
+            Console.WriteLine("markdown input -o output [--compact] [--noxml] [--parallel-writes]");
             Console.WriteLine();
         }
 

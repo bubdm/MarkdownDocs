@@ -21,7 +21,7 @@ namespace MarkdownDocs.Metadata
         Static
     }
 
-    [DebuggerDisplay("{Namespace + \".\" + Name}")]
+    [DebuggerDisplay("{FullName}")]
     public class TypeMetadata : ITypeMetadata, ITypeBuilder
     {
         private readonly Dictionary<int, PropertyMetadata> _properties = new Dictionary<int, PropertyMetadata>();
@@ -40,6 +40,7 @@ namespace MarkdownDocs.Metadata
         public bool IsMicrosoftType { get; set; }
         public TypeCategory Category { get; set; }
         public TypeModifier Modifier { get; set; }
+        public string FullName => $"{Namespace}.{Name}";
 
         public TypeMetadata(int id) => Id = id;
 

@@ -1,6 +1,8 @@
-﻿namespace MarkdownDocs.Markdown
+﻿using System;
+
+namespace MarkdownDocs.Markdown
 {
-    public interface IMarkdownWriter
+    public interface IMarkdownWriter : IAsyncDisposable
     {
 
     }

@@ -6,6 +6,6 @@ namespace MarkdownDocs.Resolver
 {
     public interface IAssemblyResolver
     {
-        Task<IAssemblyMetadata> ResolveAsync(string path, CancellationToken cancellationToken = default);
+        Task<IAssemblyMetadata> ResolveAsync(DocsOptions options, CancellationToken cancellationToken = default);
     }
 }

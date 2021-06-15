@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MarkdownDocs
+namespace MarkdownDocs.Markdown
 {
     public interface IDocsWriter
     {

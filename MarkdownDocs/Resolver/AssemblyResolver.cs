@@ -23,19 +23,21 @@ namespace MarkdownDocs.Resolver
             _assemblyBuilder.Type(typeof(string));
         }
 
-        public async Task<IAssemblyMetadata> ResolveAsync(string path, CancellationToken cancellationToken)
+        public async Task<IAssemblyMetadata> ResolveAsync(DocsOptions options, CancellationToken cancellationToken)
         {
-            Assembly assembly = Assembly.LoadFrom(path);
+            cancellationToken.ThrowIfCancellationRequested();
+            Assembly assembly = Assembly.LoadFrom(options.InputPath);
             string? assemblyName = assembly.GetName().Name;
 
             IEnumerable<Task> tasks = assembly.ExportedTypes.Select(type => ResolveTypeAsync(type, cancellationToken));
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
 
             return _assemblyBuilder.WithName(assemblyName).Build();
         }
 
         private async Task ResolveTypeAsync(Type type, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             TypeMetadata typeRef = _assemblyBuilder.Type(type);
 
             var tasks = new List<Task>
@@ -81,7 +83,7 @@ namespace MarkdownDocs.Resolver
                 }, cancellationToken)
             };
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
     }
 }
