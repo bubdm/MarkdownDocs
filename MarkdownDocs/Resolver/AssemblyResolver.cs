@@ -10,32 +10,33 @@ namespace MarkdownDocs.Resolver
 {
     public class AssemblyResolver : IAssemblyResolver
     {
-        private readonly IAssemblyMetadata _assemblyRef;
+        private readonly IAssemblyBuilder _assemblyBuilder;
 
-        public AssemblyResolver(IAssemblyMetadata aseemblyRef)
+        public AssemblyResolver(IAssemblyBuilder assemblyBuilder)
         {
-            _assemblyRef = aseemblyRef;
+            _assemblyBuilder = assemblyBuilder;
 
-            _assemblyRef.Type(typeof(object));
-            _assemblyRef.Type(typeof(bool));
-            _assemblyRef.Type(typeof(double));
-            _assemblyRef.Type(typeof(int));
-            _assemblyRef.Type(typeof(string));
+            _assemblyBuilder.Type(typeof(object));
+            _assemblyBuilder.Type(typeof(bool));
+            _assemblyBuilder.Type(typeof(double));
+            _assemblyBuilder.Type(typeof(int));
+            _assemblyBuilder.Type(typeof(string));
         }
 
         public async Task<IAssemblyMetadata> ResolveAsync(string path, CancellationToken cancellationToken)
         {
-            Assembly? dll = Assembly.LoadFrom(path);
+            Assembly assembly = Assembly.LoadFrom(path);
+            string? assemblyName = assembly.GetName().Name;
 
-            IEnumerable<Task> tasks = dll.ExportedTypes.Select(type => VisitTypeAsync(type, cancellationToken));
+            IEnumerable<Task> tasks = assembly.ExportedTypes.Select(type => ResolveTypeAsync(type, cancellationToken));
             await Task.WhenAll(tasks);
 
-            return _assemblyRef;
+            return _assemblyBuilder.WithName(assemblyName).Build();
         }
 
-        private async Task VisitTypeAsync(Type type, CancellationToken cancellationToken)
+        private async Task ResolveTypeAsync(Type type, CancellationToken cancellationToken)
         {
-            TypeMetadata typeRef = _assemblyRef.Type(type);
+            TypeMetadata typeRef = _assemblyBuilder.Type(type);
 
             var tasks = new List<Task>
             {
@@ -43,8 +44,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (ConstructorInfo ctor in type.GetConstructors())
                     {
-                        ConstructorMetadata ctorRef = typeRef.Constructor(ctor.GetHashCode());
-                        VisitConstructor(ctorRef, ctor);
+                        _assemblyBuilder.Constructor(typeRef, ctor);
                     }
                 }, cancellationToken),
 
@@ -52,8 +52,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (FieldInfo field in type.GetFields())
                     {
-                        FieldMetadata fieldRef = typeRef.Field(field.GetHashCode());
-                        VisitField(fieldRef, field);
+                        _assemblyBuilder.Field(typeRef, field);
                     }
                 }, cancellationToken),
 
@@ -61,8 +60,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (PropertyInfo property in type.GetProperties())
                     {
-                        PropertyMetadata propRef = typeRef.Property(property.GetHashCode());
-                        VisitProperty(propRef, property);
+                        _assemblyBuilder.Property(typeRef, property);
                     }
                 }, cancellationToken),
 
@@ -70,8 +68,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (MethodInfo method in type.GetMethods())
                     {
-                        MethodMetadata methodRef = typeRef.Method(method.GetHashCode());
-                        VisitMethod(methodRef, method);
+                       _assemblyBuilder.Method(typeRef, method);
                     }
                 }, cancellationToken),
 
@@ -79,38 +76,12 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (EventInfo ev in type.GetEvents())
                     {
-                        EventMetadata eventRef = typeRef.Event(ev.GetHashCode());
-                        VisitEvent(eventRef, ev);
+                        _assemblyBuilder.Event(typeRef, ev);
                     }
                 }, cancellationToken)
             };
 
             await Task.WhenAll(tasks);
-        }
-
-        private void VisitEvent(EventMetadata eventRef, EventInfo ev)
-        {
-
-        }
-
-        private void VisitMethod(MethodMetadata methodRef, MethodInfo method)
-        {
-
-        }
-
-        private void VisitProperty(PropertyMetadata propRef, PropertyInfo property)
-        {
-
-        }
-
-        private void VisitField(FieldMetadata fieldRef, FieldInfo field)
-        {
-
-        }
-
-        private void VisitConstructor(ConstructorMetadata ctorRef, ConstructorInfo ctor)
-        {
-
         }
     }
 }

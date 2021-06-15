@@ -3,11 +3,11 @@
     public interface ITypeBuilder
     {
         ConstructorMetadata Constructor(int id);
-        EventMetadata Event(object p);
-        FieldMetadata Field(int v);
-        TypeMetadata Inherit(TypeMetadata type);
-        MethodMetadata Method(int v);
+        EventMetadata Event(int id);
+        FieldMetadata Field(int id);
+        MethodMetadata Method(int id);
         PropertyMetadata Property(int id);
+        void Inherit(TypeMetadata type);
         void Implement(TypeMetadata type);
         void Reference(TypeMetadata type);
     }

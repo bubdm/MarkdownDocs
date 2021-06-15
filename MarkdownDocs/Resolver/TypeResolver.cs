@@ -7,13 +7,13 @@ namespace MarkdownDocs.Resolver
 {
     public static class TypeResolver
     {
-        public static TypeMetadata Type(this IAssemblyMetadata metadata, in Type type)
+        public static TypeMetadata Type(this IAssemblyBuilder builder, in Type type)
         {
-            TypeMetadata meta = metadata.Type(type.GetHashCode());
+            TypeMetadata meta = builder.Type(type.GetHashCode());
 
             meta.Name = type.Name;
             meta.Namespace = type.Namespace;
-            meta.Assembly = type.Module.Name;
+            meta.Assembly = type.Assembly.GetName().Name;
             meta.IsMicrosoftType = IsMicrosoftType(type);
             meta.Category = type.GetCategory();
             meta.Modifier = type.GetModifier();
@@ -21,14 +21,14 @@ namespace MarkdownDocs.Resolver
             IEnumerable<Type> interfaces = type.GetImmediateInterfaces();
             foreach (Type interf in interfaces)
             {
-                TypeMetadata interfMeta = metadata.Type(interf);
+                TypeMetadata interfMeta = builder.Type(interf);
                 meta.Implement(interfMeta);
             }
 
             Type? baseType = type.BaseType;
             if (baseType != null)
             {
-                TypeMetadata baseMeta = metadata.Type(baseType);
+                TypeMetadata baseMeta = builder.Type(baseType);
                 meta.Inherit(baseMeta);
             }
 

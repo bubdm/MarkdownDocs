@@ -5,9 +5,9 @@ namespace MarkdownDocs.Metadata
     public interface ITypeMetadata
     {
         int Id { get; }
-        string? Assembly { get; set; }
         string Name { get; set; }
         string? Namespace { get; set; }
+        string? Assembly { get; set; }
         bool IsMicrosoftType { get; set; }
 
         TypeCategory Category { get; set; }

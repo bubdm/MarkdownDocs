@@ -36,7 +36,7 @@ namespace MarkdownDocs.Tests
 
     public class TypeResolverTests
     {
-        private readonly IAssemblyMetadata _metadata = new AssemblyMetadataStub();
+        private readonly IAssemblyBuilder _metadata = new AssemblyMetadataStub();
 
         [Fact]
         public void TestBoolType()
@@ -46,7 +46,7 @@ namespace MarkdownDocs.Tests
 
             Assert.Equal(type.Name, meta.Name);
             Assert.Equal(type.Namespace, meta.Namespace);
-            Assert.Equal(type.Module.Name, meta.Assembly);
+            Assert.Equal(type.Assembly.GetName().Name, meta.Assembly);
             Assert.True(meta.IsMicrosoftType);
             Assert.Equal(TypeCategory.Struct, meta.Category);
             Assert.Equal(TypeModifier.None, meta.Modifier);
@@ -60,7 +60,7 @@ namespace MarkdownDocs.Tests
 
             Assert.Equal(type.Name, meta.Name);
             Assert.Equal(type.Namespace, meta.Namespace);
-            Assert.Equal(type.Module.Name, meta.Assembly);
+            Assert.Equal(type.Assembly.GetName().Name, meta.Assembly);
             Assert.False(meta.IsMicrosoftType);
             Assert.Equal(TypeCategory.Enum, meta.Category);
             Assert.Equal(TypeModifier.None, meta.Modifier);

@@ -46,11 +46,10 @@ namespace MarkdownDocs.Metadata
         public void Reference(TypeMetadata type)
             => _references.Add(type);
 
-        public TypeMetadata Inherit(TypeMetadata type)
+        public void Inherit(TypeMetadata type)
         {
             _inherited.Add(type);
             type.Derive(this);
-            return type;
         }
 
         public void Implement(TypeMetadata type) => Inherit(type);
@@ -75,17 +74,17 @@ namespace MarkdownDocs.Metadata
             return default;
         }
 
-        public FieldMetadata Field(int v)
+        public FieldMetadata Field(int id)
         {
             return default;
         }
 
-        public MethodMetadata Method(int v)
+        public MethodMetadata Method(int id)
         {
             return default;
         }
 
-        public EventMetadata Event(object p)
+        public EventMetadata Event(int id)
         {
             return default;
         }

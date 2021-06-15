@@ -4,8 +4,8 @@ namespace MarkdownDocs.Metadata
 {
     public interface IAssemblyMetadata
     {
-        IEnumerable<TypeMetadata> Types { get; }
+        public string? Name { get; }
 
-        TypeMetadata Type(int id);
+        IEnumerable<TypeMetadata> Types { get; }
     }
 }
