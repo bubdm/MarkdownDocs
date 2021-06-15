@@ -1,6 +1,6 @@
-﻿namespace MarkdownDocs
+﻿namespace MarkdownDocs.CLI
 {
-    public class DocsOptions
+    public class DocsOptions : IDocsOptions
     {
         public bool IsCompact { get; }
         public bool UseXML { get; }

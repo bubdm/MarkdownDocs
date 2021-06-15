@@ -15,6 +15,7 @@ namespace MarkdownDocs.CLI
                 return;
             }
 
+            // Consider using https://github.com/commandlineparser/commandline
             var result = new OptionsBuilder(args).Build();
             if (result.IsValid)
             {

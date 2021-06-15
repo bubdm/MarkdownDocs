@@ -23,7 +23,7 @@ namespace MarkdownDocs.Resolver
             _assemblyBuilder.Type(typeof(string));
         }
 
-        public async Task<IAssemblyMetadata> ResolveAsync(DocsOptions options, CancellationToken cancellationToken)
+        public async Task<IAssemblyMetadata> ResolveAsync(IDocsOptions options, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             Assembly assembly = Assembly.LoadFrom(options.InputPath);

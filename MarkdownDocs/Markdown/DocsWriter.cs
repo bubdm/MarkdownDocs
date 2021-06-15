@@ -14,7 +14,7 @@ namespace MarkdownDocs.Markdown
 
         public DocsWriter(Func<StreamWriter, IMarkdownWriter> writerFactory) => _writerFactory = writerFactory;
 
-        public async Task WriteAsync(IAssemblyMetadata assembly, DocsOptions options, CancellationToken cancellationToken)
+        public async Task WriteAsync(IAssemblyMetadata assembly, IDocsOptions options, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             IEnumerable<ITypeMetadata> exportedTypes = assembly.Types.Where(t => t.Assembly == assembly.Name);

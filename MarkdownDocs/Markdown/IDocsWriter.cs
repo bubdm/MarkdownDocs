@@ -6,6 +6,6 @@ namespace MarkdownDocs.Markdown
 {
     public interface IDocsWriter
     {
-        Task WriteAsync(IAssemblyMetadata metadata, DocsOptions options, CancellationToken cancellationToken = default);
+        Task WriteAsync(IAssemblyMetadata metadata, IDocsOptions options, CancellationToken cancellationToken = default);
     }
 }
