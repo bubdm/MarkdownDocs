@@ -5,7 +5,7 @@
         ConstructorMetadata Constructor(int id);
         EventMetadata Event(int id);
         FieldMetadata Field(int id);
-        MethodMetadata Method(int id);
+        IMethodContext Method(int id);
         PropertyMetadata Property(int id);
         void Inherit(ITypeContext type);
         void Derive(ITypeContext type);

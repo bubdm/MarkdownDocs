@@ -26,7 +26,7 @@ namespace MarkdownDocs.Metadata
     public class TypeContext : ITypeContext
     {
         private readonly Dictionary<int, PropertyMetadata> _properties = new Dictionary<int, PropertyMetadata>();
-        private readonly Dictionary<int, MethodMetadata> _methods = new Dictionary<int, MethodMetadata>();
+        private readonly Dictionary<int, IMethodContext> _methods = new Dictionary<int, IMethodContext>();
         private readonly HashSet<ITypeContext> _implemented = new HashSet<ITypeContext>();
         private readonly HashSet<ITypeContext> _derived = new HashSet<ITypeContext>();
         private readonly HashSet<ITypeContext> _references = new HashSet<ITypeContext>();
@@ -36,7 +36,7 @@ namespace MarkdownDocs.Metadata
         public IEnumerable<ITypeContext> Derived => _derived;
         public IEnumerable<ITypeContext> References => _references;
 
-        public IEnumerable<MethodMetadata> Methods => _methods.Values;
+        public IEnumerable<IMethodMetadata> Methods => _methods.Values;
         public IEnumerable<PropertyMetadata> Properties => _properties.Values;
 
         public int Id { get; private set; }
@@ -109,14 +109,14 @@ namespace MarkdownDocs.Metadata
             return default;
         }
 
-        public MethodMetadata Method(int id)
+        public IMethodContext Method(int id)
         {
             if (_methods.TryGetValue(id, out var method))
             {
                 return method;
             }
 
-            var newMethod = new MethodMetadata(id, this);
+            var newMethod = new MethodContext(id, this);
             _methods.Add(id, newMethod);
 
             return newMethod;

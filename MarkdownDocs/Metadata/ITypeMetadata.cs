@@ -19,7 +19,7 @@ namespace MarkdownDocs.Metadata
         IEnumerable<ITypeContext> Derived { get; }
         IEnumerable<ITypeContext> References { get; }
 
-        IEnumerable<MethodMetadata> Methods { get; }
+        IEnumerable<IMethodMetadata> Methods { get; }
         IEnumerable<PropertyMetadata> Properties { get; }
     }
 }

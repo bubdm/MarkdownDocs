@@ -76,7 +76,7 @@ namespace MarkdownDocs.Resolver
                     IMethodResolver methodResolver = _methodResolverFactory(_typeResolver, context);
                     foreach (MethodInfo method in type.GetMethods().Where(m => !m.IsSpecialName && m.DeclaringType == type))
                     {
-                        //methodResolver.Resolve(method);
+                        methodResolver.Resolve(method);
                     }
                 }, cancellationToken),
 

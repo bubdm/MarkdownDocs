@@ -42,7 +42,8 @@ namespace MarkdownDocs.CLI
 
             return new MarkdownCLI(options, assemblyResolver, docsWriter);
 
-            static IMethodResolver MethodResolverFactory(ITypeResolver typeResolver, ITypeContext context) => new MethodResolver(typeResolver, context);
+            static IParameterResolver ParameterResolverFactory(IMethodContext context, ITypeResolver typeResolver) => new ParameterResolver(context, typeResolver);
+            static IMethodResolver MethodResolverFactory(ITypeResolver typeResolver, ITypeContext context) => new MethodResolver(typeResolver, context, ParameterResolverFactory);
             static ITypeResolver TypeResolverFactory(IAssemblyContext builder) => new TypeResolver(builder, MethodResolverFactory);
 
             static IMarkdownWriter WriterFactory(StreamWriter stream) => new MarkdownWriter(stream);

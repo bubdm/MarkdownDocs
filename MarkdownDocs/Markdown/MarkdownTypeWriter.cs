@@ -42,14 +42,20 @@ namespace MarkdownDocs.Markdown
 
         }
 
+        // TODO: Extract this logic into ISignatureProvider
         private void WriteSignature(ITypeMetadata type)
         {
             using (_writer.WriteCode())
             {
                 if (type.Category == TypeCategory.Delegate)
                 {
-                    var method = type.Methods.Where(m => m.Name == "Invoke");
-                    //_writer.Write($"{type.AccessModifier.ToMarkdown()} {type.Category.ToMarkdown()} {type.Name}".Clean());
+                    IMethodMetadata? method = type.Methods.FirstOrDefault(m => m.Name == "Invoke");
+                    if (method != null)
+                    {
+                        // TODO: Extract this logic into ISignatureProvider
+                        string parameters = string.Join(", ", method.Parameters.Select(p => $"{p.Type.GetName(_options)} {p.Name}"));
+                        _writer.Write($"{method.AccessModifier.ToMarkdown()} {type.Category.ToMarkdown()} {type.Name}({parameters})".Clean());
+                    }
                 }
                 else
                 {
