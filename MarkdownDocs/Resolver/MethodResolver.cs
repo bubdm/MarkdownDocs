@@ -3,12 +3,29 @@ using System.Reflection;
 
 namespace MarkdownDocs.Resolver
 {
-    public static class MethodResolver
+    public interface IMethodResolver
     {
-        public static MethodMetadata Method(this IAssemblyBuilder builder, in TypeMetadata typeMeta, in MethodInfo method)
+        MethodMetadata Resolve(MethodInfo method);
+    }
+
+    public class MethodResolver : IMethodResolver
+    {
+        private readonly ITypeContext _typeContext;
+        private readonly ITypeResolver _typeResolver;
+
+        public MethodResolver(ITypeResolver typeResolver, ITypeContext typeContext)
         {
-            MethodMetadata methodMeta = typeMeta.Method(method.GetHashCode());
-            return methodMeta;
+            _typeContext = typeContext;
+            _typeResolver = typeResolver;
+        }
+
+        public MethodMetadata Resolve(MethodInfo method)
+        {
+            MethodMetadata meta = _typeContext.Method(method.GetHashCode());
+            meta.Name = method.Name;
+
+            meta.ReturnType = _typeResolver.Resolve(method.ReturnType);
+            return meta;
         }
     }
 }

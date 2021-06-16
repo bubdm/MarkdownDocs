@@ -3,31 +3,28 @@ using System.Collections.Generic;
 
 namespace MarkdownDocs.Tests
 {
-    class AssemblyMetadataStub : IAssemblyMetadata, IAssemblyBuilder
+    class AssemblyMetadataStub : IAssemblyContext
     {
-        private readonly Dictionary<int, TypeMetadata> _types = new Dictionary<int, TypeMetadata>();
+        private readonly Dictionary<int, TypeContext> _types = new Dictionary<int, TypeContext>();
         public IEnumerable<ITypeMetadata> Types => _types.Values;
 
         public string? Name { get; private set; }
 
-        public IAssemblyMetadata Build()
-        {
-            throw new System.NotImplementedException();
-        }
+        public IAssemblyMetadata Build() => this;
 
-        public TypeMetadata Type(int id)
+        public ITypeContext Type(int id)
         {
             if (_types.TryGetValue(id, out var meta))
             {
                 return meta;
             }
 
-            var newMeta = new TypeMetadata(id);
+            var newMeta = new TypeContext(id);
             _types.Add(id, newMeta);
             return newMeta;
         }
 
-        public IAssemblyBuilder WithName(string? assemblyName)
+        public IAssemblyContext WithName(string? assemblyName)
         {
             Name = assemblyName;
             return this;

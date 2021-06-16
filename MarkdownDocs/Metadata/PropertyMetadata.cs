@@ -2,20 +2,17 @@
 {
     public enum AccessModifier
     {
+        Unknown,
         Public,
         Protected
     }
 
-    public class PropertyMetadata
+    public class PropertyMetadata : MemberMetadata
     {
-        public PropertyMetadata(int id, TypeMetadata owner)
+        public PropertyMetadata(int id, TypeContext owner) : base(id, owner)
         {
-            Id = id;
-            Owner = owner;
         }
 
-        public int Id { get; }
-        public TypeMetadata Owner { get; }
         public bool IsVirtual { get; set; }
     }
 }

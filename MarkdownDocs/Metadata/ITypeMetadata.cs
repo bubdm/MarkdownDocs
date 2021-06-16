@@ -10,11 +10,16 @@ namespace MarkdownDocs.Metadata
         string? Assembly { get; set; }
         bool IsMicrosoftType { get; set; }
 
+        AccessModifier AccessModifier { get; set; }
         TypeCategory Category { get; set; }
         TypeModifier Modifier { get; set; }
-        ITypeMetadata? Inherited { get; }
-        IEnumerable<ITypeMetadata> Implemented { get; }
-        IEnumerable<ITypeMetadata> Derived { get; }
-        IEnumerable<ITypeMetadata> References { get; }
+
+        ITypeContext? Inherited { get; }
+        IEnumerable<ITypeContext> Implemented { get; }
+        IEnumerable<ITypeContext> Derived { get; }
+        IEnumerable<ITypeContext> References { get; }
+
+        IEnumerable<MethodMetadata> Methods { get; }
+        IEnumerable<PropertyMetadata> Properties { get; }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using MarkdownDocs.Markdown;
 using MarkdownDocs.Metadata;
 using MarkdownDocs.Resolver;
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,33 +14,36 @@ namespace MarkdownDocs.CLI
 
     public class MarkdownCLI : IMarkdownCLI
     {
-        private readonly IAssemblyResolver _assemblyVisitor;
+        private readonly IAssemblyResolver _assemblyResolver;
         private readonly IDocsWriter _docsWriter;
 
         public IDocsOptions Options { get; }
 
-        private MarkdownCLI(IDocsOptions options, IAssemblyResolver assemblyVisitor, IDocsWriter docsWriter)
+        private MarkdownCLI(IDocsOptions options, IAssemblyResolver assemblyResolver, IDocsWriter docsWriter)
         {
             Options = options;
-            _assemblyVisitor = assemblyVisitor;
+            _assemblyResolver = assemblyResolver;
             _docsWriter = docsWriter;
         }
 
         public async Task WriteDocsAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            IAssemblyMetadata metadata = await _assemblyVisitor.ResolveAsync(Options, cancellationToken).ConfigureAwait(false);
+            IAssemblyMetadata metadata = await _assemblyResolver.ResolveAsync(Options, cancellationToken).ConfigureAwait(false);
             await _docsWriter.WriteAsync(metadata, Options, cancellationToken).ConfigureAwait(false);
         }
 
         public static IMarkdownCLI New(IDocsOptions options)
         {
             var assemblyMeta = new AssemblyMetadata();
-            var assemblyVisitor = new AssemblyResolver(assemblyMeta, new TypeResolver(assemblyMeta));
+            var assemblyResolver = new AssemblyResolver(assemblyMeta, TypeResolverFactory, MethodResolverFactory);
 
             var docsWriter = new DocsWriter(WriterFactory, TypeWriterFactory);
 
-            return new MarkdownCLI(options, assemblyVisitor, docsWriter);
+            return new MarkdownCLI(options, assemblyResolver, docsWriter);
+
+            static IMethodResolver MethodResolverFactory(ITypeResolver typeResolver, ITypeContext context) => new MethodResolver(typeResolver, context);
+            static ITypeResolver TypeResolverFactory(IAssemblyContext builder) => new TypeResolver(builder, MethodResolverFactory);
 
             static IMarkdownWriter WriterFactory(StreamWriter stream) => new MarkdownWriter(stream);
             IMarkdownWriterAsync<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new MarkdownTypeWriter(writer, options);

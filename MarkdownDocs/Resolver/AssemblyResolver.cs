@@ -10,23 +10,27 @@ namespace MarkdownDocs.Resolver
 {
     public class AssemblyResolver : IAssemblyResolver
     {
-        private readonly IAssemblyBuilder _assemblyBuilder;
-        private readonly IResolver<ITypeMetadata, Type> _typeResolver;
+        private readonly IAssemblyContext _assemblyBuilder;
+        private readonly ITypeResolver _typeResolver;
+        private readonly Func<ITypeResolver, ITypeContext, IMethodResolver> _methodResolverFactory;
 
-        public AssemblyResolver(IAssemblyBuilder assemblyBuilder, IResolver<ITypeMetadata, Type> typeResolver)
+        public AssemblyResolver(IAssemblyContext assemblyBuilder,
+            Func<IAssemblyContext, ITypeResolver> typeResolver,
+            Func<ITypeResolver, ITypeContext, IMethodResolver> methodResolverFactory)
         {
             _assemblyBuilder = assemblyBuilder;
-            _typeResolver = typeResolver;
+            _methodResolverFactory = methodResolverFactory;
+            _typeResolver = typeResolver(assemblyBuilder);
+        }
 
+        public async Task<IAssemblyMetadata> ResolveAsync(IDocsOptions options, CancellationToken cancellationToken)
+        {
             _typeResolver.Resolve(typeof(object));
             _typeResolver.Resolve(typeof(bool));
             _typeResolver.Resolve(typeof(double));
             _typeResolver.Resolve(typeof(int));
             _typeResolver.Resolve(typeof(string));
-        }
 
-        public async Task<IAssemblyMetadata> ResolveAsync(IDocsOptions options, CancellationToken cancellationToken)
-        {
             cancellationToken.ThrowIfCancellationRequested();
             Assembly assembly = Assembly.LoadFrom(options.InputPath);
             string? assemblyName = assembly.GetName().Name;
@@ -39,8 +43,7 @@ namespace MarkdownDocs.Resolver
 
         private async Task ResolveTypeAsync(Type type, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            ITypeMetadata typeRef = _typeResolver.Resolve(type);
+            ITypeContext context = _typeResolver.Resolve(type);
 
             var tasks = new List<Task>
             {
@@ -48,7 +51,7 @@ namespace MarkdownDocs.Resolver
                 {
                     foreach (ConstructorInfo ctor in type.GetConstructors())
                     {
-                        //_assemblyBuilder.Constructor(typeRef, ctor);
+                        //_typeResolver.Resolve(type, ctor);
                     }
                 }, cancellationToken),
 
@@ -70,9 +73,10 @@ namespace MarkdownDocs.Resolver
 
                 Task.Run(() =>
                 {
-                    foreach (MethodInfo method in type.GetMethods())
+                    IMethodResolver methodResolver = _methodResolverFactory(_typeResolver, context);
+                    foreach (MethodInfo method in type.GetMethods().Where(m => !m.IsSpecialName && m.DeclaringType == type))
                     {
-                       //_assemblyBuilder.Method(typeRef, method);
+                        //methodResolver.Resolve(method);
                     }
                 }, cancellationToken),
 

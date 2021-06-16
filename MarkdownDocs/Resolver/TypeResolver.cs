@@ -5,25 +5,32 @@ using System.Reflection;
 
 namespace MarkdownDocs.Resolver
 {
-    public interface IResolver<TResult, TValue>
+    public interface ITypeResolver
     {
-        TResult Resolve(in TValue value);
+        ITypeContext Resolve(Type value);
     }
 
-    public class TypeResolver : IResolver<ITypeMetadata, Type>
+    public class TypeResolver : ITypeResolver
     {
-        private readonly IAssemblyBuilder _builder;
+        private readonly IAssemblyContext _assemblyBuilder;
+        private readonly Func<ITypeResolver, ITypeContext, IMethodResolver> _methodResolver;
 
-        public TypeResolver(in IAssemblyBuilder builder)
+        public TypeResolver(IAssemblyContext assemblyBuilder, Func<ITypeResolver, ITypeContext, IMethodResolver> methodResolver)
         {
-            _builder = builder;
+            _assemblyBuilder = assemblyBuilder;
+            _methodResolver = methodResolver;
         }
 
-        public ITypeMetadata Resolve(in Type type) => ResolveImpl(type);
-
-        private TypeMetadata ResolveImpl(in Type type)
+        public ITypeContext Resolve(Type type)
         {
-            TypeMetadata meta = _builder.Type(type.GetHashCode());
+            ITypeContext typeMeta = ResolveRecursive(type);
+
+            return typeMeta;
+        }
+
+        private ITypeContext ResolveRecursive(in Type type)
+        {
+            ITypeContext meta = _assemblyBuilder.Type(type.GetHashCode());
 
             meta.Name = type.Name;
             meta.Namespace = type.Namespace;
@@ -35,15 +42,25 @@ namespace MarkdownDocs.Resolver
             IEnumerable<Type> interfaces = GetImmediateInterfaces(type);
             foreach (Type interf in interfaces)
             {
-                TypeMetadata interfMeta = ResolveImpl(interf);
+                ITypeContext interfMeta = ResolveRecursive(interf);
                 meta.Implement(interfMeta);
             }
 
             Type? baseType = type.BaseType;
             if (baseType != null)
             {
-                TypeMetadata baseMeta = ResolveImpl(baseType);
+                ITypeContext baseMeta = ResolveRecursive(baseType);
                 meta.Inherit(baseMeta);
+            }
+
+            if (meta.Category == TypeCategory.Delegate)
+            {
+                MethodInfo? invoke = type.GetMethod("Invoke");
+                if (invoke != null)
+                {
+                    IMethodResolver resolver = _methodResolver(this, meta);
+                    resolver.Resolve(invoke);
+                }
             }
 
             return meta;

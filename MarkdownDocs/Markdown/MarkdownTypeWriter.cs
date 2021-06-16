@@ -32,6 +32,53 @@ namespace MarkdownDocs.Markdown
             WriteImplementations(type);
             WriteDerivedTypes(type);
             WriteReferences(type);
+
+            WriteSummary(type);
+            WriteSignature(type);
+        }
+
+        private void WriteSummary(ITypeMetadata type)
+        {
+
+        }
+
+        private void WriteSignature(ITypeMetadata type)
+        {
+            using (_writer.WriteCode())
+            {
+                if (type.Category == TypeCategory.Delegate)
+                {
+                    var method = type.Methods.Where(m => m.Name == "Invoke");
+                    //_writer.Write($"{type.AccessModifier.ToMarkdown()} {type.Category.ToMarkdown()} {type.Name}".Clean());
+                }
+                else
+                {
+                    WriteTitle(type);
+
+                    if (type.Category != TypeCategory.Enum)
+                    {
+                        string implemented = string.Join(", ", type.Implemented.Select(t => t.GetName(_options)));
+                        bool inherits = type.Inherited != null && type.Inherited.Inherited != null;
+
+                        if (inherits || implemented.Length > 0)
+                        {
+                            _writer.Write(" : ");
+                        }
+
+                        if (inherits)
+                        {
+                            _writer.Write($"{type.Inherited!.GetName(_options)}");
+                        }
+
+                        if (implemented.Length > 0)
+                        {
+                            _writer.Write($"{(inherits ? ", " : string.Empty)}{implemented}");
+                        }
+                    }
+                }
+            }
+
+            void WriteTitle(ITypeMetadata type) => _writer.Write($"{type.AccessModifier.ToMarkdown()} {type.Modifier.ToMarkdown()} {type.Category.ToMarkdown()} {type.Name}".Clean());
         }
 
         private void WriteReferences(ITypeMetadata type)

@@ -4,19 +4,19 @@ using System.Collections.Generic;
 
 namespace MarkdownDocs.Metadata
 {
-    public class AssemblyMetadata : IAssemblyMetadata, IAssemblyBuilder
+    public class AssemblyMetadata : IAssemblyMetadata, IAssemblyContext
     {
-        private readonly ConcurrentDictionary<int, TypeMetadata> _types = new ConcurrentDictionary<int, TypeMetadata>(64, 64);
-        private readonly Func<int, TypeMetadata> _typeFactory = (id) => new TypeMetadata(id);
+        private readonly ConcurrentDictionary<int, ITypeContext> _types = new ConcurrentDictionary<int, ITypeContext>(64, 64);
+        private readonly Func<int, ITypeContext> _typeFactory = (id) => new TypeContext(id);
         
         public IEnumerable<ITypeMetadata> Types => _types.Values;
         public string? Name { get; private set; } = "UNKNOWN";
 
-        public TypeMetadata Type(int id) => _types.GetOrAdd(id, _typeFactory);
+        public ITypeContext Type(int id) => _types.GetOrAdd(id, _typeFactory);
 
         public IAssemblyMetadata Build() => this;
 
-        public IAssemblyBuilder WithName(string? assemblyName)
+        public IAssemblyContext WithName(string? assemblyName)
         {
             Name = assemblyName;
             return this;
