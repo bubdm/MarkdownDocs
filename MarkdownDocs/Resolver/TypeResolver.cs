@@ -28,14 +28,18 @@ namespace MarkdownDocs.Resolver
             return typeMeta;
         }
 
-        private ITypeContext ResolveRecursive(in Type type)
+        // TODO: Return from cache if already resolved
+        private ITypeContext ResolveRecursive(Type type)
         {
-            ITypeContext meta = _assemblyBuilder.Type(type.GetHashCode());
+            Type? realType = Nullable.GetUnderlyingType(type);
+            type = realType ?? type;
 
-            meta.Name = type.Name;
+            ITypeContext meta = _assemblyBuilder.Type(type.GetHashCode());
+            
+            meta.Name = type.ToPrettyName();
             meta.Namespace = type.Namespace;
             meta.Assembly = type.Assembly.GetName().Name;
-            meta.IsMicrosoftType = IsMicrosoftType(type);
+            meta.Company = GetCompanyName(type);
             meta.Category = GetCategory(type);
             meta.Modifier = GetModifier(type);
 
@@ -136,10 +140,10 @@ namespace MarkdownDocs.Resolver
             return TypeModifier.None;
         }
 
-        public static bool IsMicrosoftType(Type type)
+        public static string? GetCompanyName(Type type)
         {
             var attribute = type.Assembly.GetCustomAttribute<AssemblyCompanyAttribute>();
-            return attribute?.Company.Contains("Microsoft Corporation", StringComparison.OrdinalIgnoreCase) ?? false;
+            return attribute?.Company;
         }
     }
 }

@@ -6,9 +6,10 @@ namespace MarkdownDocs.Metadata
     {
         int Id { get; }
         string Name { get; set; }
+        string FullName { get; }
         string? Namespace { get; set; }
         string? Assembly { get; set; }
-        bool IsMicrosoftType { get; set; }
+        string? Company { get; set; }
 
         AccessModifier AccessModifier { get; set; }
         TypeCategory Category { get; set; }

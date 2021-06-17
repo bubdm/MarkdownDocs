@@ -9,7 +9,7 @@ namespace MarkdownDocs.Markdown
         public static readonly string LineBreak = $"{new string(' ', 2)}\r\n";
 
         private readonly StreamWriter _stream;
-        private bool _isWritingCode;
+        private bool _isWritingCodeBlock;
 
         public MarkdownWriter(StreamWriter stream)
         {
@@ -21,7 +21,7 @@ namespace MarkdownDocs.Markdown
 
         public void Write(string text) => _stream.Write(text);
 
-        public void WriteLine(string? text = null) => _stream.WriteLine(_isWritingCode ? text : $"{text}{LineBreak}");
+        public void WriteLine(string? text = null) => _stream.WriteLine(_isWritingCodeBlock ? text : $"{text}{LineBreak}");
 
         public void WriteHeading(string text, uint level = 1)
         {
@@ -29,42 +29,28 @@ namespace MarkdownDocs.Markdown
             WriteLine($"{indent} {text}");
         }
 
-        public IDisposable WriteCode(bool multiline) => new CodeBlockWriter(this, multiline);
+        public IDisposable WriteCodeBlock() => new CodeBlockWriter(this);
+
+        public void WriteCode(string? text) => Write($"`{text}`");
 
         private class CodeBlockWriter : IDisposable
         {
             private readonly MarkdownWriter _writer;
-            private readonly bool _multiline;
 
-            public CodeBlockWriter(MarkdownWriter writer, bool multiline)
+            public CodeBlockWriter(MarkdownWriter writer)
             {
                 _writer = writer;
-                _multiline = multiline;
-                _writer._isWritingCode = true;
+                _writer._isWritingCodeBlock = true;
 
-                if (_multiline)
-                {
-                    _writer.WriteLine("```csharp");
-                }
-                else
-                {
-                    _writer.Write("`");
-                }
+                _writer.WriteLine("```csharp");
             }
 
             public void Dispose()
             {
-                if (_multiline)
-                {
-                    _writer.WriteLine();
-                    _writer.WriteLine("```");
-                }
-                else
-                {
-                    _writer.Write("`");
-                }
+                _writer.WriteLine();
+                _writer.WriteLine("```");
 
-                _writer._isWritingCode = false;
+                _writer._isWritingCodeBlock = false;
             }
         }
     }

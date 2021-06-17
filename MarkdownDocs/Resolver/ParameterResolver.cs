@@ -23,6 +23,8 @@ namespace MarkdownDocs.Resolver
         {
             IParameterMetadata meta = _context.Parameter(parameter.GetHashCode());
             meta.Name = parameter.Name;
+
+            // TODO: How to deal with generic types?
             meta.Type = _typeResolver.Resolve(parameter.ParameterType);
 
             return meta;

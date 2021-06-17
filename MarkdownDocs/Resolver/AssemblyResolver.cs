@@ -25,12 +25,6 @@ namespace MarkdownDocs.Resolver
 
         public async Task<IAssemblyMetadata> ResolveAsync(IDocsOptions options, CancellationToken cancellationToken)
         {
-            _typeResolver.Resolve(typeof(object));
-            _typeResolver.Resolve(typeof(bool));
-            _typeResolver.Resolve(typeof(double));
-            _typeResolver.Resolve(typeof(int));
-            _typeResolver.Resolve(typeof(string));
-
             cancellationToken.ThrowIfCancellationRequested();
             Assembly assembly = Assembly.LoadFrom(options.InputPath);
             string? assemblyName = assembly.GetName().Name;
@@ -73,10 +67,13 @@ namespace MarkdownDocs.Resolver
 
                 Task.Run(() =>
                 {
-                    IMethodResolver methodResolver = _methodResolverFactory(_typeResolver, context);
-                    foreach (MethodInfo method in type.GetMethods().Where(m => !m.IsSpecialName && m.DeclaringType == type))
+                    if(!type.IsSubclassOf(typeof(Delegate)))
                     {
-                        methodResolver.Resolve(method);
+                        IMethodResolver methodResolver = _methodResolverFactory(_typeResolver, context);
+                        foreach (MethodInfo method in type.GetMethods().Where(m => !m.IsSpecialName && m.DeclaringType == type))
+                        {
+                            methodResolver.Resolve(method);
+                        }
                     }
                 }, cancellationToken),
 

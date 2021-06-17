@@ -35,19 +35,19 @@ namespace MarkdownDocs.CLI
 
         public static IMarkdownCLI New(IDocsOptions options)
         {
-            var assemblyMeta = new AssemblyMetadata();
-            var assemblyResolver = new AssemblyResolver(assemblyMeta, TypeResolverFactory, MethodResolverFactory);
+            IDocsUrlResolver urlResolver = new DocsUrlResolver(options);
+            IAssemblyContext assemblyContext = new AssemblyMetadata();
+            IAssemblyResolver assemblyResolver = new AssemblyResolver(assemblyContext, TypeResolverFactory, MethodResolverFactory);
+            ISignatureFactory signatureFactory = new SignatureFactory(options, urlResolver);
 
-            var docsWriter = new DocsWriter(WriterFactory, TypeWriterFactory);
-
+            IDocsWriter docsWriter = new DocsWriter(WriterFactory, TypeWriterFactory);
             return new MarkdownCLI(options, assemblyResolver, docsWriter);
 
+            static IMarkdownWriter WriterFactory(StreamWriter stream) => new MarkdownWriter(stream);
             static IParameterResolver ParameterResolverFactory(IMethodContext context, ITypeResolver typeResolver) => new ParameterResolver(context, typeResolver);
             static IMethodResolver MethodResolverFactory(ITypeResolver typeResolver, ITypeContext context) => new MethodResolver(typeResolver, context, ParameterResolverFactory);
             static ITypeResolver TypeResolverFactory(IAssemblyContext builder) => new TypeResolver(builder, MethodResolverFactory);
-
-            static IMarkdownWriter WriterFactory(StreamWriter stream) => new MarkdownWriter(stream);
-            IMarkdownWriterAsync<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new MarkdownTypeWriter(writer, options);
+            IMarkdownWriterAsync<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new MarkdownTypeWriter(writer, signatureFactory, urlResolver, options);
         }
     }
 }

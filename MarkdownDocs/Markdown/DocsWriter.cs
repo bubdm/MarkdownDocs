@@ -22,7 +22,7 @@ namespace MarkdownDocs.Markdown
         public async Task WriteAsync(IAssemblyMetadata assembly, IDocsOptions options, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            IEnumerable<ITypeMetadata> exportedTypes = assembly.Types.Where(t => t.Assembly == assembly.Name);
+            IEnumerable<ITypeMetadata> exportedTypes = assembly.Types.Where(t => t.Assembly == assembly.Name).OrderBy(t => t.Name);
 
             if (options.IsCompact)
             {

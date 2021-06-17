@@ -34,6 +34,11 @@ namespace MarkdownDocs.Tests
 
     #endregion
 
+    public static class TypeMetaExtensions
+    {
+        public static bool IsMicrosoftType(this ITypeMetadata meta) => meta.Company == DocsUrlResolver.Microsoft;
+    }
+
     public class TypeResolverTests
     {
         private readonly ITypeResolver _typeResolver;
@@ -55,7 +60,7 @@ namespace MarkdownDocs.Tests
             Assert.Equal(type.Name, meta.Name);
             Assert.Equal(type.Namespace, meta.Namespace);
             Assert.Equal(type.Assembly.GetName().Name, meta.Assembly);
-            Assert.True(meta.IsMicrosoftType);
+            Assert.True(meta.IsMicrosoftType());
             Assert.Equal(TypeCategory.Struct, meta.Category);
             Assert.Equal(TypeModifier.None, meta.Modifier);
         }
@@ -69,9 +74,10 @@ namespace MarkdownDocs.Tests
             Assert.Equal(type.Name, meta.Name);
             Assert.Equal(type.Namespace, meta.Namespace);
             Assert.Equal(type.Assembly.GetName().Name, meta.Assembly);
-            Assert.False(meta.IsMicrosoftType);
+            Assert.False(meta.IsMicrosoftType());
             Assert.Equal(TypeCategory.Enum, meta.Category);
             Assert.Equal(TypeModifier.None, meta.Modifier);
+            Assert.Empty(meta.Implemented);
         }
 
         [Fact]

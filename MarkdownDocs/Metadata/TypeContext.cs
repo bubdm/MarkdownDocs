@@ -43,7 +43,8 @@ namespace MarkdownDocs.Metadata
         public string Name { get; set; } = default!;
         public string? Namespace { get; set; }
         public string? Assembly { get; set; } = default!;
-        public bool IsMicrosoftType { get; set; }
+        public string? Company { get; set; }
+        public bool IsNullable { get; set; }
         public TypeCategory Category { get; set; }
         public TypeModifier Modifier { get; set; }
         public AccessModifier AccessModifier { get; set; } = AccessModifier.Public;
@@ -75,13 +76,13 @@ namespace MarkdownDocs.Metadata
         {
             if (_derived.Add(type))
             {
-                if (type.Category == TypeCategory.Class)
+                if (type.Category == TypeCategory.Interface)
                 {
-                    type.Inherit(this);
+                    type.Implement(this);
                 }
                 else
                 {
-                    type.Implement(this);
+                    type.Inherit(this);
                 }
             }
         }
