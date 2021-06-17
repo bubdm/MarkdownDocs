@@ -139,7 +139,8 @@ namespace MarkdownDocs.Markdown
 
                 foreach (IParameterMetadata parameter in parameters)
                 {
-                    _writer.WriteCode($"{parameter.Name} ");
+                    _writer.WriteCode(parameter.Name);
+                    _writer.Write(" ");
 
                     string typeLink = parameter.Type.Link(method.Owner, _urlResolver);
                     _writer.WriteLine(typeLink);

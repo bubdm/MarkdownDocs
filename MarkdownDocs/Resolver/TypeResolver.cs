@@ -31,9 +31,6 @@ namespace MarkdownDocs.Resolver
         // TODO: Return from cache if already resolved
         private ITypeContext ResolveRecursive(Type type)
         {
-            Type? realType = Nullable.GetUnderlyingType(type);
-            type = realType ?? type;
-
             ITypeContext meta = _assemblyBuilder.Type(type.GetHashCode());
             
             meta.Name = type.ToPrettyName();

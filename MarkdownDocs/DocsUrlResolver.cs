@@ -1,6 +1,7 @@
 ﻿using MarkdownDocs.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace MarkdownDocs
 {
@@ -38,7 +39,7 @@ namespace MarkdownDocs
 
         public string ResolveUrl(ITypeMetadata type)
         {
-            string baseUrl = string.Empty; // TODO: #1 use value from options
+            string baseUrl = _options.BaseUrl;
 
             if (!string.IsNullOrWhiteSpace(type.Company))
             {
@@ -59,6 +60,16 @@ namespace MarkdownDocs
             return link;
         }
 
+        private string GetNullableName(string name)
+        {
+            GroupCollection groups = Regex.Match(name, @"Nullable<(.*)>").Groups;
+            if (groups.Count == 2)
+            {
+                return name.Replace(groups[0].Value, $"{groups[1].Value}?");
+            }
+            return name;
+        }
+
         public string GetTypeName(ITypeMetadata type, bool pretty = false)
         {
             if (pretty && _typeNameMap.TryGetValue(type.Name, out string? prettyName))
@@ -66,9 +77,9 @@ namespace MarkdownDocs
                 return prettyName;
             }
 
-            bool displayNamespace = false; // TODO: #1 use value from options
+            bool displayNamespace = !_options.NoNamespace;
             string result = displayNamespace ? type.FullName : type.Name;
-            return result;
+            return GetNullableName(result);
         }
 
         public string GetTypeName(ITypeMetadata type, ITypeMetadata relativeTo, bool pretty = false)
@@ -78,10 +89,10 @@ namespace MarkdownDocs
                 return prettyName;
             }
 
-            bool displayNamespace = false; // TODO: #1 use value from options
-            if (displayNamespace && type.Namespace != relativeTo.Namespace)
+            bool displayNamespace = !_options.NoNamespace;
+            if (displayNamespace)
             {
-                return type.FullName;
+                return type.Namespace != relativeTo.Namespace ? GetNullableName(type.FullName) : GetNullableName(type.Name);
             }
 
             return GetTypeName(type, pretty);

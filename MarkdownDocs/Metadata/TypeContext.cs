@@ -1,4 +1,4 @@
-﻿using MarkdownDocs.Resolver;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -44,11 +44,10 @@ namespace MarkdownDocs.Metadata
         public string? Namespace { get; set; }
         public string? Assembly { get; set; } = default!;
         public string? Company { get; set; }
-        public bool IsNullable { get; set; }
         public TypeCategory Category { get; set; }
         public TypeModifier Modifier { get; set; }
         public AccessModifier AccessModifier { get; set; } = AccessModifier.Public;
-        public string FullName => $"{Namespace}.{Name}";
+        public string FullName => Name.Contains("?") ? $"{Namespace}.{nameof(Nullable)}<{Name.Replace("?", string.Empty)}>" : $"{Namespace}.{Name}";
 
         public TypeContext(int id) => Id = id;
 

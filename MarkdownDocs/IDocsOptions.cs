@@ -7,5 +7,7 @@
         bool IsCompact { get; }
         bool ParallelWrites { get; }
         bool UseXML { get; }
+        bool NoNamespace { get; }
+        string BaseUrl { get; }
     }
 }
