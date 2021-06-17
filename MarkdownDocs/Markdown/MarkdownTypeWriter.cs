@@ -116,13 +116,14 @@ namespace MarkdownDocs.Markdown
 
                 foreach (IMethodMetadata method in methods)
                 {
+                    WriteTitle(method);
                     WriteSummary(method);
                     WriteSignature(method);
                     WriteParameters(method);
 
                     if (method.ReturnType.Name != typeof(void).Name)
                     {
-                        _writer.WriteHeading("Returns", _baseHeadingLevel + 2);
+                        _writer.WriteLine("Returns".Bold());
                         string typeLink = method.ReturnType.Link(method.Owner, _urlResolver);
                         _writer.WriteLine(typeLink);
                     }
@@ -130,12 +131,18 @@ namespace MarkdownDocs.Markdown
             }
         }
 
+        private void WriteTitle(IMethodMetadata method)
+        {
+            string parameters = string.Join(", ", method.Parameters.Select(p => _urlResolver.GetTypeName(p.Type, method.Owner)));
+            _writer.WriteHeading($"{method.Name}({parameters})", _baseHeadingLevel + 2);
+        }
+
         private void WriteParameters(IMethodMetadata method)
         {
             List<IParameterMetadata> parameters = method.Parameters.ToList();
             if (parameters.Count > 0)
             {
-                _writer.WriteHeading("Parameters", _baseHeadingLevel + 2);
+                _writer.WriteLine("Parameters".Bold());
 
                 foreach (IParameterMetadata parameter in parameters)
                 {

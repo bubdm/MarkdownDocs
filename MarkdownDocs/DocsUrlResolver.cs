@@ -54,9 +54,7 @@ namespace MarkdownDocs
                 return $"#{type.Name}-{type.Category}".ToLowerInvariant();
             }
 
-            string[] path = type.FullName.Split(".");
-            string link = string.Join("/", path);
-            link = string.IsNullOrWhiteSpace(baseUrl) ? link : $"{baseUrl}/{link}";
+            string link = string.IsNullOrWhiteSpace(baseUrl) ? type.Name : $"{baseUrl}/{type.Name}";
             return link;
         }
 

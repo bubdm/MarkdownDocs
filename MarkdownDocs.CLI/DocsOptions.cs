@@ -5,7 +5,7 @@
         public bool IsCompact { get; }
         public bool UseXML { get; }
         public bool ParallelWrites { get; }
-        public bool NoNamespace => false;
+        public bool NoNamespace => true;
 
         public string BaseUrl => string.Empty;
         public string InputPath { get; }

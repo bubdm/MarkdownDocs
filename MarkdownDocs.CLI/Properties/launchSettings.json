@@ -2,7 +2,7 @@
   "profiles": {
     "MarkdownDocs.CLI": {
       "commandName": "Project",
-      "commandLineArgs": "nodify/Nodify.dll -o ./nodify/docs --compact"
+      "commandLineArgs": "nodify/Nodify.dll -o ./nodify/docs"
     }
   }
 }
