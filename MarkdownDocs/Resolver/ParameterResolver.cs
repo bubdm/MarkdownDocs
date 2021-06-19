@@ -22,11 +22,12 @@ namespace MarkdownDocs.Resolver
 
         public IParameterMetadata Resolve(ParameterInfo parameter)
         {
-            IParameterContext meta = _context.Parameter(parameter.GetHashCode());
+            IParameterContext context = _context.Parameter(parameter.GetHashCode());
+            IParameterMetadata meta = context.GetMetadata();
             meta.Name = parameter.Name;
 
             ITypeContext type = _typeResolver.Resolve(parameter.ParameterType);
-            meta.ParameterType(type);
+            context.ParameterType(type);
 
             return meta;
         }

@@ -26,7 +26,9 @@ namespace MarkdownDocs.Resolver
 
         public IMethodContext Resolve(MethodInfo method)
         {
-            IMethodContext meta = _typeContext.Method(method.GetHashCode());
+            IMethodContext context = _typeContext.Method(method.GetHashCode());
+            IMethodMetadata meta = context.GetMetadata();
+
             if (method.IsGenericMethod)
             {
                 meta.Name = method.Name.Split('`')[0] + "<" + string.Join(", ", method.GetGenericArguments().Select(t => t.ToPrettyName()).ToArray()) + ">";
@@ -38,15 +40,15 @@ namespace MarkdownDocs.Resolver
 
             meta.AccessModifier = method.IsPublic ? AccessModifier.Public : AccessModifier.Protected;
 
-            IParameterResolver resolver = _parameterResolverFactory(meta, _typeResolver);
+            IParameterResolver resolver = _parameterResolverFactory(context, _typeResolver);
             foreach (ParameterInfo param in method.GetParameters())
             {
                 resolver.Resolve(param);
             }
 
             ITypeContext returnType = _typeResolver.Resolve(method.ReturnType);
-            meta.Return(returnType);
-            return meta;
+            context.Return(returnType);
+            return context;
         }
     }
 }

@@ -25,21 +25,23 @@ namespace MarkdownDocs.Resolver
         public ITypeContext Resolve(Type type)
         {
             if (type.ContainsGenericParameters && type.FullName == null)
-            { 
+            {
                 // If it's a generic parameter or generic return type resolve it in another context
-                ITypeContext meta = CreateContext().ResolveRecursive(type);    
+                ITypeContext context = CreateContext().ResolveRecursive(type);
+                ITypeMetadata meta = context.GetMetadata();
+
                 meta.Assembly = string.Empty;
-                return meta;
+                return context;
             }
 
             ITypeContext typeMeta = ResolveRecursive(type);
-
             return typeMeta;
         }
 
         private ITypeContext ResolveRecursive(Type type)
         {
-            ITypeContext meta = _assemblyContext.Type(type.GetHashCode());
+            ITypeContext context = _assemblyContext.Type(type.GetHashCode());
+            ITypeMetadata meta = context.GetMetadata();
 
             // Type was not previously resolved
             if (string.IsNullOrEmpty(meta.Name))
@@ -55,14 +57,14 @@ namespace MarkdownDocs.Resolver
                 foreach (Type interf in interfaces)
                 {
                     ITypeContext interfMeta = ResolveRecursive(interf);
-                    meta.Implement(interfMeta);
+                    context.Implement(interfMeta);
                 }
 
                 Type? baseType = type.BaseType;
                 if (baseType != null)
                 {
                     ITypeContext baseMeta = ResolveRecursive(baseType);
-                    meta.Inherit(baseMeta);
+                    context.Inherit(baseMeta);
                 }
 
                 if (meta.Category == TypeCategory.Delegate)
@@ -70,13 +72,13 @@ namespace MarkdownDocs.Resolver
                     MethodInfo? invoke = type.GetMethod("Invoke");
                     if (invoke != null)
                     {
-                        IMethodResolver resolver = _methodResolver(this, meta);
+                        IMethodResolver resolver = _methodResolver(this, context);
                         resolver.Resolve(invoke);
                     }
                 }
             }
 
-            return meta;
+            return context;
         }
 
         private static IEnumerable<Type> GetImmediateInterfaces(Type type)

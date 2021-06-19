@@ -2,9 +2,10 @@
 
 namespace MarkdownDocs.Context
 {
-    public interface IMethodContext : IMethodMetadata
+    public interface IMethodContext
     {
         IParameterContext Parameter(int id);
         void Return(ITypeContext type);
+        IMethodMetadata GetMetadata();
     }
 }

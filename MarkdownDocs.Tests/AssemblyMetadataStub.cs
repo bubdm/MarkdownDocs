@@ -1,17 +1,18 @@
 ﻿using MarkdownDocs.Context;
 using MarkdownDocs.Metadata;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MarkdownDocs.Tests
 {
-    class AssemblyMetadataStub : IAssemblyContext
+    class AssemblyMetadataStub : IAssemblyMetadata, IAssemblyContext
     {
         private readonly Dictionary<int, ITypeContext> _types = new Dictionary<int, ITypeContext>();
-        public IEnumerable<ITypeMetadata> Types => _types.Values;
+        public IEnumerable<ITypeMetadata> Types => _types.Values.Select(t => t.GetMetadata());
 
         public string? Name { get; private set; }
 
-        public IAssemblyMetadata Build() => this;
+        public IAssemblyMetadata GetMetadata() => this;
 
         public ITypeContext Type(int id)
         {

@@ -2,24 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace MarkdownDocs.Context
 {
     [DebuggerDisplay("{FullName}")]
-    public class TypeContext : ITypeContext
+    public class TypeContext : ITypeContext, ITypeMetadata
     {
         private readonly Dictionary<int, PropertyContext> _properties = new Dictionary<int, PropertyContext>();
         private readonly Dictionary<int, IMethodContext> _methods = new Dictionary<int, IMethodContext>();
-        private readonly HashSet<ITypeContext> _implemented = new HashSet<ITypeContext>();
-        private readonly HashSet<ITypeContext> _derived = new HashSet<ITypeContext>();
-        private readonly HashSet<ITypeContext> _references = new HashSet<ITypeContext>();
+        private readonly HashSet<ITypeMetadata> _implemented = new HashSet<ITypeMetadata>();
+        private readonly HashSet<ITypeMetadata> _derived = new HashSet<ITypeMetadata>();
+        private readonly HashSet<ITypeMetadata> _references = new HashSet<ITypeMetadata>();
 
         public ITypeMetadata? Inherited { get; private set; }
         public IEnumerable<ITypeMetadata> Implemented => _implemented;
         public IEnumerable<ITypeMetadata> Derived => _derived;
         public IEnumerable<ITypeMetadata> References => _references;
 
-        public IEnumerable<IMethodMetadata> Methods => _methods.Values;
+        public IEnumerable<IMethodMetadata> Methods => _methods.Values.Select(m => m.GetMetadata());
         public IEnumerable<IPropertyMetadata> Properties => _properties.Values;
 
         public int Id { get; private set; }
@@ -34,42 +35,46 @@ namespace MarkdownDocs.Context
 
         public TypeContext(int id) => Id = id;
 
-        public void Reference(ITypeContext type)
+        public void Reference(ITypeContext context)
         {
+            ITypeMetadata type = context.GetMetadata();
             if (this != type && type.Assembly == Assembly && _references.Add(type))
             {
-                type.Reference(this);
+                context.Reference(this);
             }
         }
 
-        public void Inherit(ITypeContext type)
+        public void Inherit(ITypeContext context)
         {
+            ITypeMetadata type = context.GetMetadata();
             if (Inherited != type)
             {
                 Inherited = type;
-                type.Derive(this);
+                context.Derive(this);
             }
         }
 
-        public void Implement(ITypeContext type)
+        public void Implement(ITypeContext context)
         {
+            ITypeMetadata type = context.GetMetadata();
             if (_implemented.Add(type))
             {
-                type.Derive(this);
+                context.Derive(this);
             }
         }
 
-        public void Derive(ITypeContext type)
+        public void Derive(ITypeContext context)
         {
+            ITypeMetadata type = context.GetMetadata();
             if (_derived.Add(type))
             {
                 if (type.Category == TypeCategory.Interface)
                 {
-                    type.Implement(this);
+                    context.Implement(this);
                 }
                 else
                 {
-                    type.Inherit(this);
+                    context.Inherit(this);
                 }
             }
         }
@@ -115,7 +120,8 @@ namespace MarkdownDocs.Context
             return default;
         }
 
-        public ITypeContext Build() => this;
+        public ITypeMetadata GetMetadata()
+            => this;
 
         public override int GetHashCode()
             => Id;

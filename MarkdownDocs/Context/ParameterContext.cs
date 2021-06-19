@@ -2,7 +2,7 @@
 
 namespace MarkdownDocs.Context
 {
-    public class ParameterContext : IParameterContext
+    public class ParameterContext : IParameterMetadata, IParameterContext
     {
         private readonly ITypeContext _owner;
 
@@ -16,9 +16,11 @@ namespace MarkdownDocs.Context
         public ITypeMetadata Type { get; private set; } = default!;
         public string? Name { get; set; }
 
+        public IParameterMetadata GetMetadata() => this;
+
         public void ParameterType(ITypeContext type)
         {
-            Type = type;
+            Type = type.GetMetadata();
             type.Reference(_owner);
         }
     }

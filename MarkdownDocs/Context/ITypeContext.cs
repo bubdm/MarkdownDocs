@@ -2,7 +2,7 @@
 
 namespace MarkdownDocs.Context
 {
-    public interface ITypeContext : ITypeMetadata
+    public interface ITypeContext
     {
         ConstructorMetadata Constructor(int id);
         EventMetadata Event(int id);
@@ -13,5 +13,6 @@ namespace MarkdownDocs.Context
         void Derive(ITypeContext type);
         void Implement(ITypeContext type);
         void Reference(ITypeContext type);
+        ITypeMetadata GetMetadata();
     }
 }

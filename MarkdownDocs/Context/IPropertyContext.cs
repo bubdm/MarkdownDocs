@@ -2,7 +2,8 @@
 
 namespace MarkdownDocs.Context
 {
-    public interface IPropertyContext : IPropertyMetadata
+    public interface IPropertyContext 
     {
+        IPropertyMetadata GetMetadata();
     }
 }

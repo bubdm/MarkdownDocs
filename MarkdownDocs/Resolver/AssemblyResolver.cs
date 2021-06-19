@@ -33,7 +33,7 @@ namespace MarkdownDocs.Resolver
             IEnumerable<Task> tasks = assembly.ExportedTypes.Select(type => ResolveTypeAsync(type, cancellationToken));
             await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            return _assemblyBuilder.WithName(assemblyName).Build();
+            return _assemblyBuilder.WithName(assemblyName).GetMetadata();
         }
 
         private async Task ResolveTypeAsync(Type type, CancellationToken cancellationToken)

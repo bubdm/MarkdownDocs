@@ -2,8 +2,9 @@
 
 namespace MarkdownDocs.Context
 {
-    public interface IParameterContext : IParameterMetadata
+    public interface IParameterContext
     {
         void ParameterType(ITypeContext type);
+        IParameterMetadata GetMetadata();
     }
 }

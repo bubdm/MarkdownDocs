@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MarkdownDocs.Context
 {
@@ -10,12 +11,12 @@ namespace MarkdownDocs.Context
         private readonly ConcurrentDictionary<int, ITypeContext> _types = new ConcurrentDictionary<int, ITypeContext>(64, 64);
         private readonly Func<int, ITypeContext> _typeFactory = (id) => new TypeContext(id);
         
-        public IEnumerable<ITypeMetadata> Types => _types.Values;
+        public IEnumerable<ITypeMetadata> Types => _types.Values.Select(t => t.GetMetadata());
         public string? Name { get; private set; } = "UNKNOWN";
 
         public ITypeContext Type(int id) => _types.GetOrAdd(id, _typeFactory);
 
-        public IAssemblyMetadata Build() => this;
+        public IAssemblyMetadata GetMetadata() => this;
 
         public IAssemblyContext WithName(string? assemblyName)
         {
