@@ -1,43 +1,26 @@
-﻿using System;
+﻿using MarkdownDocs.Metadata;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace MarkdownDocs.Metadata
+namespace MarkdownDocs.Context
 {
-    public enum TypeCategory
-    {
-        Unknown,
-        Enum,
-        Interface,
-        Struct,
-        Delegate,
-        Class
-    }
-
-    public enum TypeModifier
-    {
-        None,
-        Abstract,
-        Sealed,
-        Static
-    }
-
     [DebuggerDisplay("{FullName}")]
     public class TypeContext : ITypeContext
     {
-        private readonly Dictionary<int, PropertyMetadata> _properties = new Dictionary<int, PropertyMetadata>();
+        private readonly Dictionary<int, PropertyContext> _properties = new Dictionary<int, PropertyContext>();
         private readonly Dictionary<int, IMethodContext> _methods = new Dictionary<int, IMethodContext>();
         private readonly HashSet<ITypeContext> _implemented = new HashSet<ITypeContext>();
         private readonly HashSet<ITypeContext> _derived = new HashSet<ITypeContext>();
         private readonly HashSet<ITypeContext> _references = new HashSet<ITypeContext>();
 
-        public ITypeContext? Inherited { get; private set; }
-        public IEnumerable<ITypeContext> Implemented => _implemented;
-        public IEnumerable<ITypeContext> Derived => _derived;
-        public IEnumerable<ITypeContext> References => _references;
+        public ITypeMetadata? Inherited { get; private set; }
+        public IEnumerable<ITypeMetadata> Implemented => _implemented;
+        public IEnumerable<ITypeMetadata> Derived => _derived;
+        public IEnumerable<ITypeMetadata> References => _references;
 
         public IEnumerable<IMethodMetadata> Methods => _methods.Values;
-        public IEnumerable<PropertyMetadata> Properties => _properties.Values;
+        public IEnumerable<IPropertyMetadata> Properties => _properties.Values;
 
         public int Id { get; private set; }
         public string Name { get; set; } = default!;
@@ -52,7 +35,12 @@ namespace MarkdownDocs.Metadata
         public TypeContext(int id) => Id = id;
 
         public void Reference(ITypeContext type)
-            => _references.Add(type);
+        {
+            if (this != type && type.Assembly == Assembly && _references.Add(type))
+            {
+                type.Reference(this);
+            }
+        }
 
         public void Inherit(ITypeContext type)
         {
@@ -86,14 +74,14 @@ namespace MarkdownDocs.Metadata
             }
         }
 
-        public PropertyMetadata Property(int id)
+        public PropertyContext Property(int id)
         {
             if (_properties.TryGetValue(id, out var prop))
             {
                 return prop;
             }
 
-            var newProp = new PropertyMetadata(id, this);
+            var newProp = new PropertyContext(id, this);
             _properties.Add(id, newProp);
 
             return newProp;

@@ -1,4 +1,5 @@
-﻿using MarkdownDocs.Metadata;
+﻿using MarkdownDocs.Context;
+using MarkdownDocs.Metadata;
 using System.Reflection;
 
 namespace MarkdownDocs.Resolver
@@ -21,11 +22,11 @@ namespace MarkdownDocs.Resolver
 
         public IParameterMetadata Resolve(ParameterInfo parameter)
         {
-            IParameterMetadata meta = _context.Parameter(parameter.GetHashCode());
+            IParameterContext meta = _context.Parameter(parameter.GetHashCode());
             meta.Name = parameter.Name;
 
-            // TODO: How to deal with generic types?
-            meta.Type = _typeResolver.Resolve(parameter.ParameterType);
+            ITypeContext type = _typeResolver.Resolve(parameter.ParameterType);
+            meta.ParameterType(type);
 
             return meta;
         }

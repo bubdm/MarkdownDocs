@@ -15,12 +15,12 @@ namespace MarkdownDocs.Metadata
         TypeCategory Category { get; set; }
         TypeModifier Modifier { get; set; }
 
-        ITypeContext? Inherited { get; }
-        IEnumerable<ITypeContext> Implemented { get; }
-        IEnumerable<ITypeContext> Derived { get; }
-        IEnumerable<ITypeContext> References { get; }
+        ITypeMetadata? Inherited { get; }
+        IEnumerable<ITypeMetadata> Implemented { get; }
+        IEnumerable<ITypeMetadata> Derived { get; }
+        IEnumerable<ITypeMetadata> References { get; }
 
         IEnumerable<IMethodMetadata> Methods { get; }
-        IEnumerable<PropertyMetadata> Properties { get; }
+        IEnumerable<IPropertyMetadata> Properties { get; }
     }
 }

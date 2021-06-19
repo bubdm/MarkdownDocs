@@ -1,4 +1,5 @@
-﻿using MarkdownDocs.Metadata;
+﻿using MarkdownDocs.Context;
+using MarkdownDocs.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;

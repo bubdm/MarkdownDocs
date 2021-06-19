@@ -12,11 +12,29 @@ namespace MarkdownDocs.Markdown
 
         public static string Clean(this string text) => new Regex("[ ]{2,}", RegexOptions.None).Replace(text, " ");
 
+        public static string Sanitize(this string text)
+        {
+            int genericStart = text.IndexOf('<');
+            int genericEnd = text.IndexOf('>');
+
+            if (genericStart != genericEnd)
+            {
+                return text.Remove(genericStart, genericEnd - genericStart + 1);
+            }
+
+            return text;
+        }
+
         public static string Link(this ITypeMetadata type, in ITypeMetadata relativeTo, in IDocsUrlResolver resolver)
         {
             string name = resolver.GetTypeName(type, relativeTo);
-            string url = resolver.ResolveUrl(type);
-            return name.Link(url);
+            if (!string.IsNullOrWhiteSpace(type.Assembly))
+            {
+                string url = resolver.ResolveUrl(type);
+                return name.Link(url);
+            }
+
+            return name;
         }
 
         public static string ToMarkdown(this AccessModifier modifier)

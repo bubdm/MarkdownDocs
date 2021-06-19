@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace MarkdownDocs.Markdown
 {
-    public interface IMarkdownWriterAsync<T>
+    public interface IMarkdownMetadataWriter<T>
     {
         Task WriteAsync(T item, CancellationToken cancellationToken);
     }

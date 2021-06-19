@@ -11,9 +11,9 @@ namespace MarkdownDocs.Markdown
     public class DocsWriter : IDocsWriter
     {
         private readonly Func<StreamWriter, IMarkdownWriter> _mdWriterFactory;
-        private readonly Func<IMarkdownWriter, IMarkdownWriterAsync<ITypeMetadata>> _typeWriterFactory;
+        private readonly Func<IMarkdownWriter, IMarkdownMetadataWriter<ITypeMetadata>> _typeWriterFactory;
 
-        public DocsWriter(Func<StreamWriter, IMarkdownWriter> mdWriterFactory, Func<IMarkdownWriter, IMarkdownWriterAsync<ITypeMetadata>> typeWriterFactory)
+        public DocsWriter(Func<StreamWriter, IMarkdownWriter> mdWriterFactory, Func<IMarkdownWriter, IMarkdownMetadataWriter<ITypeMetadata>> typeWriterFactory)
         {
             _mdWriterFactory = mdWriterFactory;
             _typeWriterFactory = typeWriterFactory;
@@ -35,7 +35,7 @@ namespace MarkdownDocs.Markdown
                     IMarkdownWriter writer = _mdWriterFactory(stream);
                     await using (writer.ConfigureAwait(false))
                     {
-                        IMarkdownWriterAsync<ITypeMetadata> typeWriter = _typeWriterFactory(writer);
+                        IMarkdownMetadataWriter<ITypeMetadata> typeWriter = _typeWriterFactory(writer);
                         foreach (ITypeMetadata type in exportedTypes)
                         {
                             await typeWriter.WriteAsync(type, cancellationToken).ConfigureAwait(false);

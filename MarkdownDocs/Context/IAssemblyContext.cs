@@ -1,4 +1,6 @@
-﻿namespace MarkdownDocs.Metadata
+﻿using MarkdownDocs.Metadata;
+
+namespace MarkdownDocs.Context
 {
     public interface IAssemblyContext : IAssemblyMetadata
     {

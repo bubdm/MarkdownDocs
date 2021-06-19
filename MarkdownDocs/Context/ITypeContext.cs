@@ -1,4 +1,6 @@
-﻿namespace MarkdownDocs.Metadata
+﻿using MarkdownDocs.Metadata;
+
+namespace MarkdownDocs.Context
 {
     public interface ITypeContext : ITypeMetadata
     {
@@ -6,7 +8,7 @@
         EventMetadata Event(int id);
         FieldMetadata Field(int id);
         IMethodContext Method(int id);
-        PropertyMetadata Property(int id);
+        PropertyContext Property(int id);
         void Inherit(ITypeContext type);
         void Derive(ITypeContext type);
         void Implement(ITypeContext type);

@@ -1,5 +1,7 @@
-﻿using MarkdownDocs.Metadata;
+﻿using MarkdownDocs.Context;
+using MarkdownDocs.Metadata;
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace MarkdownDocs.Resolver
@@ -15,7 +17,7 @@ namespace MarkdownDocs.Resolver
         private readonly Func<IMethodContext, ITypeResolver, IParameterResolver> _parameterResolverFactory;
         private readonly ITypeResolver _typeResolver;
 
-        public MethodResolver(ITypeResolver typeResolver, ITypeContext typeContext, Func<IMethodContext, ITypeResolver,  IParameterResolver> parameterResolverFactory)
+        public MethodResolver(ITypeResolver typeResolver, ITypeContext typeContext, Func<IMethodContext, ITypeResolver, IParameterResolver> parameterResolverFactory)
         {
             _typeContext = typeContext;
             _parameterResolverFactory = parameterResolverFactory;
@@ -25,7 +27,15 @@ namespace MarkdownDocs.Resolver
         public IMethodContext Resolve(MethodInfo method)
         {
             IMethodContext meta = _typeContext.Method(method.GetHashCode());
-            meta.Name = method.Name;
+            if (method.IsGenericMethod)
+            {
+                meta.Name = method.Name.Split('`')[0] + "<" + string.Join(", ", method.GetGenericArguments().Select(t => t.ToPrettyName()).ToArray()) + ">";
+            }
+            else
+            {
+                meta.Name = method.Name;
+            }
+
             meta.AccessModifier = method.IsPublic ? AccessModifier.Public : AccessModifier.Protected;
 
             IParameterResolver resolver = _parameterResolverFactory(meta, _typeResolver);
@@ -34,7 +44,8 @@ namespace MarkdownDocs.Resolver
                 resolver.Resolve(param);
             }
 
-            meta.ReturnType = _typeResolver.Resolve(method.ReturnType);
+            ITypeContext returnType = _typeResolver.Resolve(method.ReturnType);
+            meta.Return(returnType);
             return meta;
         }
     }

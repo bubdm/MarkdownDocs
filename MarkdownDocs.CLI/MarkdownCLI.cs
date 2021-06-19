@@ -1,4 +1,5 @@
-﻿using MarkdownDocs.Markdown;
+﻿using MarkdownDocs.Context;
+using MarkdownDocs.Markdown;
 using MarkdownDocs.Metadata;
 using MarkdownDocs.Resolver;
 using System.IO;
@@ -36,7 +37,7 @@ namespace MarkdownDocs.CLI
         public static IMarkdownCLI New(IDocsOptions options)
         {
             IDocsUrlResolver urlResolver = new DocsUrlResolver(options);
-            IAssemblyContext assemblyContext = new AssemblyMetadata();
+            IAssemblyContext assemblyContext = new AssemblyContext();
             IAssemblyResolver assemblyResolver = new AssemblyResolver(assemblyContext, TypeResolverFactory, MethodResolverFactory);
             ISignatureFactory signatureFactory = new SignatureFactory(options, urlResolver);
 
@@ -47,7 +48,7 @@ namespace MarkdownDocs.CLI
             static IParameterResolver ParameterResolverFactory(IMethodContext context, ITypeResolver typeResolver) => new ParameterResolver(context, typeResolver);
             static IMethodResolver MethodResolverFactory(ITypeResolver typeResolver, ITypeContext context) => new MethodResolver(typeResolver, context, ParameterResolverFactory);
             static ITypeResolver TypeResolverFactory(IAssemblyContext builder) => new TypeResolver(builder, MethodResolverFactory);
-            IMarkdownWriterAsync<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new MarkdownTypeWriter(writer, signatureFactory, urlResolver, options);
+            IMarkdownMetadataWriter<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new MarkdownTypeWriter(writer, signatureFactory, urlResolver, options);
         }
     }
 }

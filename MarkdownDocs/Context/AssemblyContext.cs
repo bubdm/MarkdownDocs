@@ -1,10 +1,11 @@
-﻿using System;
+﻿using MarkdownDocs.Metadata;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace MarkdownDocs.Metadata
+namespace MarkdownDocs.Context
 {
-    public class AssemblyMetadata : IAssemblyMetadata, IAssemblyContext
+    public class AssemblyContext : IAssemblyMetadata, IAssemblyContext
     {
         private readonly ConcurrentDictionary<int, ITypeContext> _types = new ConcurrentDictionary<int, ITypeContext>(64, 64);
         private readonly Func<int, ITypeContext> _typeFactory = (id) => new TypeContext(id);

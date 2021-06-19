@@ -1,5 +1,4 @@
 ﻿using MarkdownDocs.Metadata;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MarkdownDocs.Markdown
 {
-    public class MarkdownTypeWriter : IMarkdownWriterAsync<ITypeMetadata>
+    public class MarkdownTypeWriter : IMarkdownMetadataWriter<ITypeMetadata>
     {
         private readonly IMarkdownWriter _writer;
         private readonly ISignatureFactory _signatureFactory;
@@ -134,7 +133,8 @@ namespace MarkdownDocs.Markdown
         private void WriteTitle(IMethodMetadata method)
         {
             string parameters = string.Join(", ", method.Parameters.Select(p => _urlResolver.GetTypeName(p.Type, method.Owner)));
-            _writer.WriteHeading($"{method.Name}({parameters})", _baseHeadingLevel + 2);
+            string name = method.Name.Sanitize();
+            _writer.WriteHeading($"{name}({parameters})", _baseHeadingLevel + 2);
         }
 
         private void WriteParameters(IMethodMetadata method)

@@ -1,4 +1,5 @@
-﻿using MarkdownDocs.Metadata;
+﻿using MarkdownDocs.Context;
+using MarkdownDocs.Metadata;
 using MarkdownDocs.Resolver;
 using System;
 using Xunit;

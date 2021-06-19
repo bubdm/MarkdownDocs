@@ -1,4 +1,5 @@
-﻿using MarkdownDocs.Metadata;
+﻿using MarkdownDocs.Context;
+using MarkdownDocs.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -12,55 +13,66 @@ namespace MarkdownDocs.Resolver
 
     public class TypeResolver : ITypeResolver
     {
-        private readonly IAssemblyContext _assemblyBuilder;
+        private readonly IAssemblyContext _assemblyContext;
         private readonly Func<ITypeResolver, ITypeContext, IMethodResolver> _methodResolver;
 
-        public TypeResolver(IAssemblyContext assemblyBuilder, Func<ITypeResolver, ITypeContext, IMethodResolver> methodResolver)
+        public TypeResolver(IAssemblyContext assemblyContext, Func<ITypeResolver, ITypeContext, IMethodResolver> methodResolver)
         {
-            _assemblyBuilder = assemblyBuilder;
+            _assemblyContext = assemblyContext;
             _methodResolver = methodResolver;
         }
 
         public ITypeContext Resolve(Type type)
         {
+            if (type.ContainsGenericParameters && type.FullName == null)
+            { 
+                // If it's a generic parameter or generic return type resolve it in another context
+                ITypeContext meta = CreateContext().ResolveRecursive(type);    
+                meta.Assembly = string.Empty;
+                return meta;
+            }
+
             ITypeContext typeMeta = ResolveRecursive(type);
 
             return typeMeta;
         }
 
-        // TODO: Return from cache if already resolved
         private ITypeContext ResolveRecursive(Type type)
         {
-            ITypeContext meta = _assemblyBuilder.Type(type.GetHashCode());
-            
-            meta.Name = type.ToPrettyName();
-            meta.Namespace = type.Namespace;
-            meta.Assembly = type.Assembly.GetName().Name;
-            meta.Company = GetCompanyName(type);
-            meta.Category = GetCategory(type);
-            meta.Modifier = GetModifier(type);
+            ITypeContext meta = _assemblyContext.Type(type.GetHashCode());
 
-            IEnumerable<Type> interfaces = GetImmediateInterfaces(type);
-            foreach (Type interf in interfaces)
+            // Type was not previously resolved
+            if (string.IsNullOrEmpty(meta.Name))
             {
-                ITypeContext interfMeta = ResolveRecursive(interf);
-                meta.Implement(interfMeta);
-            }
+                meta.Name = type.ToPrettyName();
+                meta.Namespace = type.Namespace;
+                meta.Assembly = type.Assembly.GetName().Name;
+                meta.Company = GetCompanyName(type);
+                meta.Category = GetCategory(type);
+                meta.Modifier = GetModifier(type);
 
-            Type? baseType = type.BaseType;
-            if (baseType != null)
-            {
-                ITypeContext baseMeta = ResolveRecursive(baseType);
-                meta.Inherit(baseMeta);
-            }
-
-            if (meta.Category == TypeCategory.Delegate)
-            {
-                MethodInfo? invoke = type.GetMethod("Invoke");
-                if (invoke != null)
+                IEnumerable<Type> interfaces = GetImmediateInterfaces(type);
+                foreach (Type interf in interfaces)
                 {
-                    IMethodResolver resolver = _methodResolver(this, meta);
-                    resolver.Resolve(invoke);
+                    ITypeContext interfMeta = ResolveRecursive(interf);
+                    meta.Implement(interfMeta);
+                }
+
+                Type? baseType = type.BaseType;
+                if (baseType != null)
+                {
+                    ITypeContext baseMeta = ResolveRecursive(baseType);
+                    meta.Inherit(baseMeta);
+                }
+
+                if (meta.Category == TypeCategory.Delegate)
+                {
+                    MethodInfo? invoke = type.GetMethod("Invoke");
+                    if (invoke != null)
+                    {
+                        IMethodResolver resolver = _methodResolver(this, meta);
+                        resolver.Resolve(invoke);
+                    }
                 }
             }
 
@@ -142,5 +154,7 @@ namespace MarkdownDocs.Resolver
             var attribute = type.Assembly.GetCustomAttribute<AssemblyCompanyAttribute>();
             return attribute?.Company;
         }
+
+        public TypeResolver CreateContext() => new TypeResolver(new AssemblyContext(), _methodResolver);
     }
 }
