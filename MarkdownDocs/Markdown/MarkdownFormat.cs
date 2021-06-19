@@ -55,6 +55,17 @@ namespace MarkdownDocs.Markdown
                 _ => throw new NotImplementedException(),
             };
 
+        public static string ToMarkdown(this MethodModifier modifier)
+            => modifier switch
+            {
+                MethodModifier.None => string.Empty,
+                MethodModifier.Override => "override",
+                MethodModifier.Virtual => "virtual",
+                MethodModifier.Abstract => "abstract",
+                MethodModifier.Static => "static",
+                _ => throw new NotImplementedException(),
+            };
+
         public static string ToMarkdown(this TypeCategory cateogry)
             => cateogry.ToString().ToLowerInvariant();
     }

@@ -6,6 +6,13 @@ using System.Linq;
 
 namespace MarkdownDocs.Context
 {
+    public interface IAssemblyContext
+    {
+        ITypeContext Type(int id);
+        IAssemblyContext WithName(string? assemblyName);
+        IAssemblyMetadata GetMetadata();
+    }
+
     public class AssemblyContext : IAssemblyMetadata, IAssemblyContext
     {
         private readonly ConcurrentDictionary<int, ITypeContext> _types = new ConcurrentDictionary<int, ITypeContext>(64, 64);

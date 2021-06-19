@@ -14,9 +14,9 @@ namespace MarkdownDocs.Resolver
     public class TypeResolver : ITypeResolver
     {
         private readonly IAssemblyContext _assemblyContext;
-        private readonly Func<ITypeResolver, ITypeContext, IMethodResolver> _methodResolver;
+        private readonly Func<ITypeContext, ITypeResolver, IMethodResolver> _methodResolver;
 
-        public TypeResolver(IAssemblyContext assemblyContext, Func<ITypeResolver, ITypeContext, IMethodResolver> methodResolver)
+        public TypeResolver(IAssemblyContext assemblyContext, Func<ITypeContext, ITypeResolver, IMethodResolver> methodResolver)
         {
             _assemblyContext = assemblyContext;
             _methodResolver = methodResolver;
@@ -72,7 +72,7 @@ namespace MarkdownDocs.Resolver
                     MethodInfo? invoke = type.GetMethod("Invoke");
                     if (invoke != null)
                     {
-                        IMethodResolver resolver = _methodResolver(this, context);
+                        IMethodResolver resolver = _methodResolver(context, this);
                         resolver.Resolve(invoke);
                     }
                 }

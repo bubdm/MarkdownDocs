@@ -6,10 +6,25 @@ using System.Linq;
 
 namespace MarkdownDocs.Context
 {
+    public interface ITypeContext
+    {
+        IConstructorContext Constructor(int id);
+        FieldMetadata Field(int id);
+        IPropertyContext Property(int id);
+        IMethodContext Method(int id);
+        EventMetadata Event(int id);
+        void Inherit(ITypeContext type);
+        void Derive(ITypeContext type);
+        void Implement(ITypeContext type);
+        void Reference(ITypeContext type);
+        ITypeMetadata GetMetadata();
+    }
+
     [DebuggerDisplay("{FullName}")]
     public class TypeContext : ITypeContext, ITypeMetadata
     {
-        private readonly Dictionary<int, PropertyContext> _properties = new Dictionary<int, PropertyContext>();
+        private readonly Dictionary<int, IConstructorContext> _constructors = new Dictionary<int, IConstructorContext>();
+        private readonly Dictionary<int, IPropertyContext> _properties = new Dictionary<int, IPropertyContext>();
         private readonly Dictionary<int, IMethodContext> _methods = new Dictionary<int, IMethodContext>();
         private readonly HashSet<ITypeMetadata> _implemented = new HashSet<ITypeMetadata>();
         private readonly HashSet<ITypeMetadata> _derived = new HashSet<ITypeMetadata>();
@@ -20,8 +35,9 @@ namespace MarkdownDocs.Context
         public IEnumerable<ITypeMetadata> Derived => _derived;
         public IEnumerable<ITypeMetadata> References => _references;
 
+        public IEnumerable<IConstructorMetadata> Constructors => _constructors.Values.Select(m => m.GetMetadata());
+        public IEnumerable<IPropertyMetadata> Properties => _properties.Values.Select(m => m.GetMetadata());
         public IEnumerable<IMethodMetadata> Methods => _methods.Values.Select(m => m.GetMetadata());
-        public IEnumerable<IPropertyMetadata> Properties => _properties.Values;
 
         public int Id { get; private set; }
         public string Name { get; set; } = default!;
@@ -79,7 +95,25 @@ namespace MarkdownDocs.Context
             }
         }
 
-        public PropertyContext Property(int id)
+        public IConstructorContext Constructor(int id)
+        {
+            if (_constructors.TryGetValue(id, out var ctor))
+            {
+                return ctor;
+            }
+
+            var newCtor = new ConstructorContext(id, this);
+            _constructors.Add(id, newCtor);
+
+            return newCtor;
+        }
+
+        public FieldMetadata Field(int id)
+        {
+            return default;
+        }
+
+        public IPropertyContext Property(int id)
         {
             if (_properties.TryGetValue(id, out var prop))
             {
@@ -90,16 +124,6 @@ namespace MarkdownDocs.Context
             _properties.Add(id, newProp);
 
             return newProp;
-        }
-
-        public ConstructorMetadata Constructor(int id)
-        {
-            return default;
-        }
-
-        public FieldMetadata Field(int id)
-        {
-            return default;
         }
 
         public IMethodContext Method(int id)

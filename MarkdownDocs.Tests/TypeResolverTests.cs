@@ -46,8 +46,8 @@ namespace MarkdownDocs.Tests
 
         public TypeResolverTests()
         {
-            static IParameterResolver ParameterResolverFactory(IMethodContext context, ITypeResolver typeResolver) => new ParameterResolver(context, typeResolver);
-            static IMethodResolver MethodResolverFactory(ITypeResolver typeResolver, ITypeContext context) => new MethodResolver(typeResolver, context, ParameterResolverFactory);
+            static IParameterResolver ParameterResolverFactory(IMethodBaseContext context, ITypeResolver typeResolver) => new ParameterResolver(context, typeResolver);
+            static IMethodResolver MethodResolverFactory(ITypeContext context, ITypeResolver typeResolver) => new MethodResolver(context, typeResolver, ParameterResolverFactory);
             IAssemblyContext builder = new AssemblyMetadataStub();
             _typeResolver = new TypeResolver(builder, MethodResolverFactory);
         }

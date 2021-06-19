@@ -17,7 +17,7 @@ namespace MarkdownDocs.Resolver
         private readonly Func<IMethodContext, ITypeResolver, IParameterResolver> _parameterResolverFactory;
         private readonly ITypeResolver _typeResolver;
 
-        public MethodResolver(ITypeResolver typeResolver, ITypeContext typeContext, Func<IMethodContext, ITypeResolver, IParameterResolver> parameterResolverFactory)
+        public MethodResolver(ITypeContext typeContext, ITypeResolver typeResolver, Func<IMethodContext, ITypeResolver, IParameterResolver> parameterResolverFactory)
         {
             _typeContext = typeContext;
             _parameterResolverFactory = parameterResolverFactory;
@@ -38,7 +38,35 @@ namespace MarkdownDocs.Resolver
                 meta.Name = method.Name;
             }
 
-            meta.AccessModifier = method.IsPublic ? AccessModifier.Public : AccessModifier.Protected;
+            if (method.IsVirtual)
+            {
+                MethodInfo baseMethod = method.GetBaseDefinition();
+                if (baseMethod != method)
+                {
+                    meta.MethodModifier = MethodModifier.Override;
+                }
+                else
+                {
+                    meta.MethodModifier = MethodModifier.Virtual;
+                }
+            }
+            else if(method.IsAbstract)
+            {
+                meta.MethodModifier = MethodModifier.Abstract;
+            }
+            else if (method.IsStatic)
+            {
+                meta.MethodModifier = MethodModifier.Static;
+            }
+
+            if (method.IsPublic)
+            {
+                meta.AccessModifier = AccessModifier.Public;
+            }
+            else if (method.IsFamily)
+            {
+                meta.AccessModifier = AccessModifier.Protected;
+            }
 
             IParameterResolver resolver = _parameterResolverFactory(context, _typeResolver);
             foreach (ParameterInfo param in method.GetParameters())

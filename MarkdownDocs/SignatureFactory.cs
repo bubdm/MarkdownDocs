@@ -9,6 +9,7 @@ namespace MarkdownDocs
     public interface ISignatureFactory
     {
         string CreateParameter(IParameterMetadata parameter);
+        string CreateConstructor(IConstructorMetadata constructor);
         string CreateMethod(IMethodMetadata method);
         string CreateDelegate(ITypeMetadata type);
         string CreateType(ITypeMetadata type);
@@ -25,6 +26,26 @@ namespace MarkdownDocs
             _urlResolver = urlResolver;
         }
 
+        public string CreateConstructor(IConstructorMetadata constructor)
+        {
+            string parameters = string.Join(", ", constructor.Parameters.Select(CreateParameter));
+            string result = $"{constructor.AccessModifier.ToMarkdown()} {constructor.Name}({parameters});".Clean();
+            return result;
+        }
+
+        public string CreateMethod(IMethodMetadata method)
+        {
+            string parameters = string.Join(", ", method.Parameters.Select(CreateParameter));
+            string result = $"{method.AccessModifier.ToMarkdown()} {method.MethodModifier.ToMarkdown()} {_urlResolver.GetTypeName(method.ReturnType, method.Owner, true)} {method.Name}({parameters});".Clean();
+            return result;
+        }
+
+        public string CreateParameter(IParameterMetadata parameter)
+        {
+            string result = $"{_urlResolver.GetTypeName(parameter.Type, true)} {parameter.Name}";
+            return result;
+        }
+
         public string CreateDelegate(ITypeMetadata type)
         {
             if (type.Category != TypeCategory.Delegate)
@@ -35,19 +56,6 @@ namespace MarkdownDocs
             IMethodMetadata method = type.Methods.First(m => m.Name == nameof(Action.Invoke));
             string parameters = string.Join(", ", method.Parameters.Select(CreateParameter));
             string result = $"{method.AccessModifier.ToMarkdown()} {type.Category.ToMarkdown()} {_urlResolver.GetTypeName(method.ReturnType, type, true)} {type.Name}({parameters});".Clean();
-            return result;
-        }
-
-        public string CreateMethod(IMethodMetadata method)
-        {
-            string parameters = string.Join(", ", method.Parameters.Select(CreateParameter));
-            string result = $"{method.AccessModifier.ToMarkdown()} {_urlResolver.GetTypeName(method.ReturnType, method.Owner, true)} {method.Name}({parameters});".Clean();
-            return result;
-        }
-
-        public string CreateParameter(IParameterMetadata parameter)
-        {
-            string result = $"{_urlResolver.GetTypeName(parameter.Type, true)} {parameter.Name}";
             return result;
         }
 

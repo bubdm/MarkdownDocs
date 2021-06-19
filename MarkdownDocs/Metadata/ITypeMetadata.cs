@@ -20,7 +20,8 @@ namespace MarkdownDocs.Metadata
         IEnumerable<ITypeMetadata> Derived { get; }
         IEnumerable<ITypeMetadata> References { get; }
 
-        IEnumerable<IMethodMetadata> Methods { get; }
+        IEnumerable<IConstructorMetadata> Constructors { get; }
         IEnumerable<IPropertyMetadata> Properties { get; }
+        IEnumerable<IMethodMetadata> Methods { get; }
     }
 }

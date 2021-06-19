@@ -13,13 +13,19 @@ namespace MarkdownDocs.Markdown
         private readonly ISignatureFactory _signatureFactory;
         private readonly IDocsUrlResolver _urlResolver;
         private readonly IMetadataWriter<IMethodMetadata> _methodWriter;
+        private readonly IMetadataWriter<IConstructorMetadata> _constructorWriter;
 
-        public TypeMetaWriter(IMarkdownWriter writer, ISignatureFactory signatureFactory, IDocsUrlResolver urlResolver, Func<IMarkdownWriter, IMetadataWriter<IMethodMetadata>> methodWriterFactory)
+        public TypeMetaWriter(IMarkdownWriter writer,
+            ISignatureFactory signatureFactory,
+            IDocsUrlResolver urlResolver,
+            Func<IMarkdownWriter, IMetadataWriter<IMethodMetadata>> methodWriterFactory,
+            Func<IMarkdownWriter, IMetadataWriter<IConstructorMetadata>> constructorWriterFactory)
         {
             _writer = writer;
             _signatureFactory = signatureFactory;
             _urlResolver = urlResolver;
             _methodWriter = methodWriterFactory(writer);
+            _constructorWriter = constructorWriterFactory(writer);
         }
 
         public async Task WriteAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken = default)
@@ -39,15 +45,12 @@ namespace MarkdownDocs.Markdown
             WriteSummary(type);
             WriteSignature(type);
 
+            await WriteConstructorsAsync(type, indent + 1, cancellationToken);
+
             if (type.Category != TypeCategory.Delegate)
             {
                 await WriteMethodsAsync(type, indent + 1, cancellationToken);
             }
-        }
-
-        private void WriteSummary(ITypeMetadata type)
-        {
-
         }
 
         private void WriteSignature(ITypeMetadata type)
@@ -98,6 +101,25 @@ namespace MarkdownDocs.Markdown
                     await _methodWriter.WriteAsync(method, indent + 1, cancellationToken);
                 }
             }
+        }
+
+        private async Task WriteConstructorsAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken)
+        {
+            List<IConstructorMetadata> constructors = type.Constructors.ToList();
+            if (constructors.Count > 0)
+            {
+                _writer.WriteHeading("Constructors", indent);
+
+                foreach (IConstructorMetadata constructor in constructors)
+                {
+                    await _constructorWriter.WriteAsync(constructor, indent + 1, cancellationToken);
+                }
+            }
+        }
+
+        private void WriteSummary(ITypeMetadata type)
+        {
+
         }
 
         private string GetInheritanceChain(ITypeMetadata type)

@@ -28,7 +28,7 @@ namespace MarkdownDocs.Markdown
             WriteSummary(method);
             WriteSignature(method);
 
-            await WriteParameters(method, indent, cancellationToken);
+            await WriteParametersAsync(method, indent, cancellationToken);
 
             if (method.ReturnType.Name != typeof(void).Name)
             {
@@ -54,7 +54,7 @@ namespace MarkdownDocs.Markdown
             _writer.WriteHeading($"{name}({parameters})", indent);
         }
 
-        private async Task WriteParameters(IMethodMetadata method, uint indent, CancellationToken cancellationToken)
+        private async Task WriteParametersAsync(IMethodMetadata method, uint indent, CancellationToken cancellationToken)
         {
             List<IParameterMetadata> parameters = method.Parameters.ToList();
             if (parameters.Count > 0)

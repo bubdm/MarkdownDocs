@@ -4,7 +4,8 @@ namespace MarkdownDocs.Metadata
 {
     public interface IMethodMetadata : IMemberMetadata
     {
-        public IEnumerable<IParameterMetadata> Parameters { get; }
-        public ITypeMetadata ReturnType { get; }
+        IEnumerable<IParameterMetadata> Parameters { get; }
+        ITypeMetadata ReturnType { get; }
+        MethodModifier MethodModifier { get; set; }
     }
 }
