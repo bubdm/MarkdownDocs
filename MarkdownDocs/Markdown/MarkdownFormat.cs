@@ -66,6 +66,16 @@ namespace MarkdownDocs.Markdown
                 _ => throw new NotImplementedException(),
             };
 
+        public static string ToMarkdown(this FieldModifier modifier)
+            => modifier switch
+            {
+                FieldModifier.None => string.Empty,
+                FieldModifier.Static => "static",
+                FieldModifier.Const => "const",
+                FieldModifier.Readonly => "readonly",
+                _ => throw new NotImplementedException(),
+            };
+
         public static string ToMarkdown(this TypeCategory cateogry)
             => cateogry.ToString().ToLowerInvariant();
     }

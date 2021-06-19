@@ -28,7 +28,7 @@ namespace MarkdownDocs.Markdown
             WriteSummary(method);
             WriteSignature(method);
 
-            await WriteParametersAsync(method, indent, cancellationToken);
+            await WriteParametersAsync(method, indent, cancellationToken).ConfigureAwait(false);
 
             if (method.ReturnType.Name != typeof(void).Name)
             {
@@ -63,7 +63,7 @@ namespace MarkdownDocs.Markdown
 
                 foreach (IParameterMetadata parameter in parameters)
                 {
-                    await _parameterWriter.WriteAsync(parameter, indent, cancellationToken);
+                    await _parameterWriter.WriteAsync(parameter, indent, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

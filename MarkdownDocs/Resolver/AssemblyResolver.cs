@@ -15,15 +15,18 @@ namespace MarkdownDocs.Resolver
         private readonly ITypeResolver _typeResolver;
         private readonly Func<ITypeContext, ITypeResolver, IMethodResolver> _methodResolverFactory;
         private readonly Func<ITypeContext, ITypeResolver, IConstructorResolver> _constructorResolverFactory;
+        private readonly Func<ITypeContext, ITypeResolver, IFieldResolver> _fieldResolverFactory;
 
         public AssemblyResolver(IAssemblyContext assemblyBuilder,
             Func<IAssemblyContext, ITypeResolver> typeResolver,
             Func<ITypeContext, ITypeResolver, IMethodResolver> methodResolverFactory,
-            Func<ITypeContext, ITypeResolver, IConstructorResolver> constructorResolverFactory)
+            Func<ITypeContext, ITypeResolver, IConstructorResolver> constructorResolverFactory,
+            Func<ITypeContext, ITypeResolver, IFieldResolver> fieldResolverFactory)
         {
             _assemblyBuilder = assemblyBuilder;
             _methodResolverFactory = methodResolverFactory;
             _constructorResolverFactory = constructorResolverFactory;
+            _fieldResolverFactory = fieldResolverFactory;
             _typeResolver = typeResolver(assemblyBuilder);
         }
 
@@ -59,9 +62,10 @@ namespace MarkdownDocs.Resolver
                 // Resolve fields
                 Task.Run(() =>
                 {
+                    IFieldResolver fieldResolver = _fieldResolverFactory(context, _typeResolver);
                     foreach (FieldInfo field in type.GetFields(searchFlags).Where(m => (m.IsPublic || m.IsFamily) && !m.IsSpecialName))
                     {
-                        //_assemblyBuilder.Field(typeRef, field);
+                        fieldResolver.Resolve(field);
                     }
                 }, cancellationToken),
 

@@ -13,6 +13,7 @@ namespace MarkdownDocs
         string CreateMethod(IMethodMetadata method);
         string CreateDelegate(ITypeMetadata type);
         string CreateType(ITypeMetadata type);
+        string CreateField(IFieldMetadata field);
     }
 
     public class SignatureFactory : ISignatureFactory
@@ -33,6 +34,13 @@ namespace MarkdownDocs
             return result;
         }
 
+        public string CreateField(IFieldMetadata field)
+        {
+            string assignValue = !string.IsNullOrWhiteSpace(field.RawValue) ? $" = {field.RawValue}" : string.Empty;
+            string result = $"{field.AccessModifier.ToMarkdown()} {field.FieldModifier.ToMarkdown()} {_urlResolver.GetTypeName(field.Type, field.Owner, true)} {field.Name}{assignValue};".Clean();
+            return result;
+        }
+
         public string CreateMethod(IMethodMetadata method)
         {
             string parameters = string.Join(", ", method.Parameters.Select(CreateParameter));
@@ -42,7 +50,8 @@ namespace MarkdownDocs
 
         public string CreateParameter(IParameterMetadata parameter)
         {
-            string result = $"{_urlResolver.GetTypeName(parameter.Type, true)} {parameter.Name}";
+            string assignValue = !string.IsNullOrWhiteSpace(parameter.RawValue) ? $" = {parameter.RawValue}" : string.Empty;
+            string result = $"{_urlResolver.GetTypeName(parameter.Type, true)} {parameter.Name}{assignValue}".Clean();
             return result;
         }
 

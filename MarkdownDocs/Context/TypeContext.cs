@@ -10,8 +10,10 @@ namespace MarkdownDocs.Context
     public class TypeContext : ITypeContext, ITypeMetadata
     {
         private readonly Dictionary<int, IConstructorContext> _constructors = new Dictionary<int, IConstructorContext>();
+        private readonly Dictionary<int, IFieldContext> _fields = new Dictionary<int, IFieldContext>();
         private readonly Dictionary<int, IPropertyContext> _properties = new Dictionary<int, IPropertyContext>();
         private readonly Dictionary<int, IMethodContext> _methods = new Dictionary<int, IMethodContext>();
+
         private readonly HashSet<ITypeMetadata> _implemented = new HashSet<ITypeMetadata>();
         private readonly HashSet<ITypeMetadata> _derived = new HashSet<ITypeMetadata>();
         private readonly HashSet<ITypeMetadata> _references = new HashSet<ITypeMetadata>();
@@ -21,6 +23,7 @@ namespace MarkdownDocs.Context
         public IEnumerable<ITypeMetadata> Derived => _derived;
         public IEnumerable<ITypeMetadata> References => _references;
 
+        public IEnumerable<IFieldMetadata> Fields => _fields.Values.Select(m => m.GetMetadata());
         public IEnumerable<IConstructorMetadata> Constructors => _constructors.Values.Select(m => m.GetMetadata());
         public IEnumerable<IPropertyMetadata> Properties => _properties.Values.Select(m => m.GetMetadata());
         public IEnumerable<IMethodMetadata> Methods => _methods.Values.Select(m => m.GetMetadata());
@@ -94,9 +97,17 @@ namespace MarkdownDocs.Context
             return newCtor;
         }
 
-        public FieldMetadata Field(int id)
+        public IFieldContext Field(int id)
         {
-            return default;
+            if (_fields.TryGetValue(id, out var field))
+            {
+                return field;
+            }
+
+            var newField = new FieldContext(id, this);
+            _fields.Add(id, newField);
+
+            return newField;
         }
 
         public IPropertyContext Property(int id)

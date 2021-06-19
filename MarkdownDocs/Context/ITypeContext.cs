@@ -14,7 +14,7 @@ namespace MarkdownDocs.Context
         TypeModifier Modifier { get; set; }
 
         IConstructorContext Constructor(int id);
-        FieldMetadata Field(int id);
+        IFieldContext Field(int id);
         IPropertyContext Property(int id);
         IMethodContext Method(int id);
         EventMetadata Event(int id);

@@ -21,6 +21,7 @@ namespace MarkdownDocs.Metadata
         IEnumerable<ITypeMetadata> References { get; }
 
         IEnumerable<IConstructorMetadata> Constructors { get; }
+        IEnumerable<IFieldMetadata> Fields { get; }
         IEnumerable<IPropertyMetadata> Properties { get; }
         IEnumerable<IMethodMetadata> Methods { get; }
     }

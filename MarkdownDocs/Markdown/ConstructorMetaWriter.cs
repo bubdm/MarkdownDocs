@@ -28,7 +28,7 @@ namespace MarkdownDocs.Markdown
             WriteSummary(constructor);
             WriteSignature(constructor);
 
-            await WriteParametersAsync(constructor, indent, cancellationToken);
+            await WriteParametersAsync(constructor, indent, cancellationToken).ConfigureAwait(false);
         }
 
         private void WriteSignature(IConstructorMetadata constructor)
@@ -56,7 +56,7 @@ namespace MarkdownDocs.Markdown
 
                 foreach (IParameterMetadata parameter in parameters)
                 {
-                    await _parameterWriter.WriteAsync(parameter, indent, cancellationToken);
+                    await _parameterWriter.WriteAsync(parameter, indent, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

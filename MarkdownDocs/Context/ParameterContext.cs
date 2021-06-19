@@ -5,6 +5,7 @@ namespace MarkdownDocs.Context
     public interface IParameterContext
     {
         string? Name { get; set; }
+        string? RawValue { get; set; }
         void ParameterType(ITypeContext type);
         IParameterMetadata GetMetadata();
     }
@@ -21,6 +22,7 @@ namespace MarkdownDocs.Context
 
         public int Id { get; }
         public string? Name { get; set; }
+        public string? RawValue { get; set; }
         public ITypeMetadata Type { get; private set; } = default!;
         public ITypeMetadata Owner => _owner.GetMetadata();
 

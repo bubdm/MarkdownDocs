@@ -1,5 +1,4 @@
 ﻿using MarkdownDocs.Context;
-using MarkdownDocs.Metadata;
 using System.Reflection;
 
 namespace MarkdownDocs.Resolver
@@ -23,11 +22,12 @@ namespace MarkdownDocs.Resolver
         public IParameterContext Resolve(ParameterInfo parameter)
         {
             IParameterContext context = _context.Parameter(parameter.GetHashCode());
-            IParameterMetadata meta = context.GetMetadata();
             context.Name = parameter.Name;
 
             ITypeContext type = _typeResolver.Resolve(parameter.ParameterType);
             context.ParameterType(type);
+
+            context.RawValue = parameter.RawDefaultValue.ToLiteralString();
 
             return context;
         }

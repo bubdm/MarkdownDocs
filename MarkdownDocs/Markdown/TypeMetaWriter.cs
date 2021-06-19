@@ -14,18 +14,21 @@ namespace MarkdownDocs.Markdown
         private readonly IDocsUrlResolver _urlResolver;
         private readonly IMetadataWriter<IMethodMetadata> _methodWriter;
         private readonly IMetadataWriter<IConstructorMetadata> _constructorWriter;
+        private readonly IMetadataWriter<IFieldMetadata> _fieldWriter;
 
         public TypeMetaWriter(IMarkdownWriter writer,
             ISignatureFactory signatureFactory,
             IDocsUrlResolver urlResolver,
             Func<IMarkdownWriter, IMetadataWriter<IMethodMetadata>> methodWriterFactory,
-            Func<IMarkdownWriter, IMetadataWriter<IConstructorMetadata>> constructorWriterFactory)
+            Func<IMarkdownWriter, IMetadataWriter<IConstructorMetadata>> constructorWriterFactory,
+            Func<IMarkdownWriter, IMetadataWriter<IFieldMetadata>> fieldWriterFactory)
         {
             _writer = writer;
             _signatureFactory = signatureFactory;
             _urlResolver = urlResolver;
             _methodWriter = methodWriterFactory(writer);
             _constructorWriter = constructorWriterFactory(writer);
+            _fieldWriter = fieldWriterFactory(writer);
         }
 
         public async Task WriteAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken = default)
@@ -45,11 +48,12 @@ namespace MarkdownDocs.Markdown
             WriteSummary(type);
             WriteSignature(type);
 
-            await WriteConstructorsAsync(type, indent + 1, cancellationToken);
+            await WriteConstructorsAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
+            await WriteFieldsAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
 
             if (type.Category != TypeCategory.Delegate)
             {
-                await WriteMethodsAsync(type, indent + 1, cancellationToken);
+                await WriteMethodsAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -98,7 +102,7 @@ namespace MarkdownDocs.Markdown
 
                 foreach (IMethodMetadata method in methods)
                 {
-                    await _methodWriter.WriteAsync(method, indent + 1, cancellationToken);
+                    await _methodWriter.WriteAsync(method, indent + 1, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -112,7 +116,21 @@ namespace MarkdownDocs.Markdown
 
                 foreach (IConstructorMetadata constructor in constructors)
                 {
-                    await _constructorWriter.WriteAsync(constructor, indent + 1, cancellationToken);
+                    await _constructorWriter.WriteAsync(constructor, indent + 1, cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private async Task WriteFieldsAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken)
+        {
+            List<IFieldMetadata> fields = type.Fields.OrderBy(f => f.Name).ToList();
+            if (fields.Count > 0)
+            {
+                _writer.WriteHeading("Fields", indent);
+
+                foreach (IFieldMetadata field in fields)
+                {
+                    await _fieldWriter.WriteAsync(field, indent + 1, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
