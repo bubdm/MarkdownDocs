@@ -30,7 +30,7 @@ namespace MarkdownDocs.Context
                 return parameter;
             }
 
-            var newParameter = new ParameterContext(Context, id);
+            var newParameter = new ParameterContext(id, Context);
             _parameters.Add(id, newParameter);
 
             return newParameter;

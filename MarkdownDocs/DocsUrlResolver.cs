@@ -15,7 +15,7 @@ namespace MarkdownDocs
     public class DocsUrlResolver : IDocsUrlResolver
     {
         private readonly IDocsOptions _options;
-
+        
         public const string Microsoft = "Microsoft Corporation";
         public const string MicrosoftDocsUrl = "https://docs.microsoft.com/en-us/dotnet/api/";
 
@@ -23,6 +23,9 @@ namespace MarkdownDocs
         {
             [typeof(float).Name] = "float",
             [typeof(int).Name] = "int",
+            [typeof(uint).Name] = "uint",
+            [typeof(long).Name] = "long",
+            [typeof(ulong).Name] = "ulong",
             [typeof(bool).Name] = "bool",
             [typeof(string).Name] = "string",
             [typeof(double).Name] = "double",

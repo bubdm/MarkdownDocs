@@ -41,37 +41,40 @@ namespace MarkdownDocs.Resolver
         {
             ITypeContext context = _assemblyContext.Type(type.GetHashCode());
 
-            // Type was not previously resolved
-            if (string.IsNullOrEmpty(context.Name))
+            lock (context)
             {
-                context.Name = type.ToPrettyName();
-                context.Namespace = type.Namespace;
-                context.Assembly = type.Assembly.GetName().Name;
-                context.Company = GetCompanyName(type);
-                context.Category = GetCategory(type);
-                context.Modifier = GetModifier(type);
-
-                IEnumerable<Type> interfaces = GetImmediateInterfaces(type);
-                foreach (Type interf in interfaces)
+                // Type was not previously resolved
+                if (string.IsNullOrEmpty(context.Name))
                 {
-                    ITypeContext interfMeta = ResolveRecursive(interf);
-                    context.Implement(interfMeta);
-                }
+                    context.Name = type.ToPrettyName();
+                    context.Namespace = type.Namespace;
+                    context.Assembly = type.Assembly.GetName().Name;
+                    context.Company = GetCompanyName(type);
+                    context.Category = GetCategory(type);
+                    context.Modifier = GetModifier(type);
 
-                Type? baseType = type.BaseType;
-                if (baseType != null)
-                {
-                    ITypeContext baseMeta = ResolveRecursive(baseType);
-                    context.Inherit(baseMeta);
-                }
-
-                if (context.Category == TypeCategory.Delegate)
-                {
-                    MethodInfo? invoke = type.GetMethod("Invoke");
-                    if (invoke != null)
+                    IEnumerable<Type> interfaces = GetImmediateInterfaces(type);
+                    foreach (Type interf in interfaces)
                     {
-                        IMethodResolver resolver = _methodResolver(context, this);
-                        resolver.Resolve(invoke);
+                        ITypeContext interfMeta = ResolveRecursive(interf);
+                        context.Implement(interfMeta);
+                    }
+
+                    Type? baseType = type.BaseType;
+                    if (baseType != null)
+                    {
+                        ITypeContext baseMeta = ResolveRecursive(baseType);
+                        context.Inherit(baseMeta);
+                    }
+
+                    if (context.Category == TypeCategory.Delegate)
+                    {
+                        MethodInfo? invoke = type.GetMethod("Invoke");
+                        if (invoke != null)
+                        {
+                            IMethodResolver resolver = _methodResolver(context, this);
+                            resolver.Resolve(invoke);
+                        }
                     }
                 }
             }

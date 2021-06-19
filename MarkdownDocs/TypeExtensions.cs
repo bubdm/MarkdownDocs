@@ -1,5 +1,7 @@
-﻿using System;
+﻿using MarkdownDocs.Metadata;
+using System;
 using System.Linq;
+using System.Reflection;
 
 namespace MarkdownDocs
 {
@@ -79,6 +81,60 @@ namespace MarkdownDocs
             }
 
             return "null";
+        }
+
+        public static AccessModifier GetAccessModifier(this MethodBase method)
+        {
+            if (method.IsPublic)
+            {
+                return AccessModifier.Public;
+            }
+            else if (method.IsFamily)
+            {
+                return AccessModifier.Protected;
+            }
+
+            return AccessModifier.Unknown;
+        }
+
+        public static AccessModifier GetAccessModifier(this FieldInfo field)
+        {
+            if (field.IsPublic)
+            {
+                return AccessModifier.Public;
+            }
+            else if (field.IsFamily)
+            {
+                return AccessModifier.Protected;
+            }
+
+            return AccessModifier.Unknown;
+        }
+
+        public static MethodModifier GetMethodModifier(this MethodInfo method)
+        {
+            if (method.IsVirtual)
+            {
+                MethodInfo baseMethod = method.GetBaseDefinition();
+                if (baseMethod != method)
+                {
+                    return MethodModifier.Override;
+                }
+                else
+                {
+                    return MethodModifier.Virtual;
+                }
+            }
+            else if (method.IsAbstract)
+            {
+                return MethodModifier.Abstract;
+            }
+            else if (method.IsStatic)
+            {
+                return MethodModifier.Static;
+            }
+
+            return MethodModifier.None;
         }
     }
 }

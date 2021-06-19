@@ -39,7 +39,7 @@ namespace MarkdownDocs.Markdown
             }
         }
 
-        private void WriteTitle(IFieldMetadata field, uint indent) => _writer.WriteHeading($"{field.Name}", indent);
+        private void WriteTitle(IFieldMetadata field, uint indent) => _writer.WriteHeading(field.Name, indent);
 
         private void WriteSummary(IFieldMetadata field)
         {

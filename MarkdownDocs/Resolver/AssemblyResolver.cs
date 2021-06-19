@@ -16,17 +16,20 @@ namespace MarkdownDocs.Resolver
         private readonly Func<ITypeContext, ITypeResolver, IMethodResolver> _methodResolverFactory;
         private readonly Func<ITypeContext, ITypeResolver, IConstructorResolver> _constructorResolverFactory;
         private readonly Func<ITypeContext, ITypeResolver, IFieldResolver> _fieldResolverFactory;
+        private readonly Func<ITypeContext, ITypeResolver, IPropertyResolver> _propertyResolverFactory;
 
         public AssemblyResolver(IAssemblyContext assemblyBuilder,
             Func<IAssemblyContext, ITypeResolver> typeResolver,
             Func<ITypeContext, ITypeResolver, IMethodResolver> methodResolverFactory,
             Func<ITypeContext, ITypeResolver, IConstructorResolver> constructorResolverFactory,
-            Func<ITypeContext, ITypeResolver, IFieldResolver> fieldResolverFactory)
+            Func<ITypeContext, ITypeResolver, IFieldResolver> fieldResolverFactory,
+            Func<ITypeContext, ITypeResolver, IPropertyResolver> propertyResolverFactory)
         {
             _assemblyBuilder = assemblyBuilder;
             _methodResolverFactory = methodResolverFactory;
             _constructorResolverFactory = constructorResolverFactory;
             _fieldResolverFactory = fieldResolverFactory;
+            _propertyResolverFactory = propertyResolverFactory;
             _typeResolver = typeResolver(assemblyBuilder);
         }
 
@@ -72,14 +75,17 @@ namespace MarkdownDocs.Resolver
                 // Resolve properties
                 Task.Run(() =>
                 {
+                    IPropertyResolver propertyResolver = _propertyResolverFactory(context, _typeResolver);
                     foreach (PropertyInfo property in type.GetProperties(searchFlags).Where(m =>
-                    ((m.GetMethod?.IsPublic ?? false)
-                    || (m.GetMethod?.IsFamily ?? false)
-                    || (m.SetMethod?.IsPublic ?? false)
-                    || (m.SetMethod?.IsFamily ?? false))
-                    && !m.IsSpecialName))
+                    (m.CanRead || m.CanWrite)
+                    && !m.IsSpecialName
+                    && ((m.GetMethod?.IsPublic ?? false)
+                        || (m.GetMethod?.IsFamily ?? false)
+                        || (m.SetMethod?.IsPublic ?? false)
+                        || (m.SetMethod?.IsFamily ?? false))
+                    ))
                     {
-                        //_assemblyBuilder.Property(typeRef, property);
+                        propertyResolver.Resolve(property);
                     }
                 }, cancellationToken),
 

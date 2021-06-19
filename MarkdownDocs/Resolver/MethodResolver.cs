@@ -1,5 +1,4 @@
 ﻿using MarkdownDocs.Context;
-using MarkdownDocs.Metadata;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -27,6 +26,8 @@ namespace MarkdownDocs.Resolver
         public IMethodContext Resolve(MethodInfo method)
         {
             IMethodContext context = _typeContext.Method(method.GetHashCode());
+            context.AccessModifier = method.GetAccessModifier();
+            context.MethodModifier = method.GetMethodModifier();
 
             if (method.IsGenericMethod)
             {
@@ -35,36 +36,6 @@ namespace MarkdownDocs.Resolver
             else
             {
                 context.Name = method.Name;
-            }
-
-            if (method.IsVirtual)
-            {
-                MethodInfo baseMethod = method.GetBaseDefinition();
-                if (baseMethod != method)
-                {
-                    context.MethodModifier = MethodModifier.Override;
-                }
-                else
-                {
-                    context.MethodModifier = MethodModifier.Virtual;
-                }
-            }
-            else if(method.IsAbstract)
-            {
-                context.MethodModifier = MethodModifier.Abstract;
-            }
-            else if (method.IsStatic)
-            {
-                context.MethodModifier = MethodModifier.Static;
-            }
-
-            if (method.IsPublic)
-            {
-                context.AccessModifier = AccessModifier.Public;
-            }
-            else if (method.IsFamily)
-            {
-                context.AccessModifier = AccessModifier.Protected;
             }
 
             IParameterResolver resolver = _parameterResolverFactory(context, _typeResolver);

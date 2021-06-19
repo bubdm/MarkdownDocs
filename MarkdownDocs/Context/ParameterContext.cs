@@ -14,10 +14,10 @@ namespace MarkdownDocs.Context
     {
         private readonly ITypeContext _owner;
 
-        public ParameterContext(ITypeContext owner, int id)
+        public ParameterContext(int id, ITypeContext owner)
         {
-            _owner = owner;
             Id = id;
+            _owner = owner;
         }
 
         public int Id { get; }

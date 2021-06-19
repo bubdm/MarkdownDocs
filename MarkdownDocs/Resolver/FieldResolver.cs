@@ -25,15 +25,7 @@ namespace MarkdownDocs.Resolver
             IFieldContext context = _typeContext.Field(field.GetHashCode());
 
             context.Name = field.Name;
-
-            if (field.IsPublic)
-            {
-                context.AccessModifier = AccessModifier.Public;
-            }
-            else if (field.IsFamily)
-            {
-                context.AccessModifier = AccessModifier.Protected;
-            }
+            context.AccessModifier = field.GetAccessModifier();
 
             if (field.IsLiteral)
             {

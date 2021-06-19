@@ -2,17 +2,39 @@
 
 namespace MarkdownDocs.Context
 {
-    public interface IPropertyContext 
+    public interface IPropertyContext
     {
+        string Name { get; set; }
+        string? RawValue { get; set; }
+        MethodModifier PropertyModifier { get; set; }
+        AccessModifier? GetMethodModifier { get; set; }
+        AccessModifier? SetMethodModifier { get; set; }
+        AccessModifier AccessModifier { get; set; }
+
+        void PropertyType(ITypeContext type);
         IPropertyMetadata GetMetadata();
     }
 
     public class PropertyContext : MemberMetadata, IPropertyMetadata, IPropertyContext
     {
-        public PropertyContext(int id, ITypeContext owner) : base(id, owner.GetMetadata())
+        public PropertyContext(int id, ITypeContext context) : base(id, context.GetMetadata())
         {
+            Context = context;
         }
 
+        public ITypeContext Context { get; }
+        public string? RawValue { get; set; }
+        public ITypeMetadata Type { get; private set; } = default!;
+        public MethodModifier PropertyModifier { get; set; }
+        public AccessModifier? GetMethodModifier { get; set; }
+        public AccessModifier? SetMethodModifier { get; set; }
+
         public IPropertyMetadata GetMetadata() => this;
+
+        public void PropertyType(ITypeContext type)
+        {
+            Type = type.GetMetadata();
+            type.Reference(Context);
+        }
     }
 }

@@ -15,13 +15,15 @@ namespace MarkdownDocs.Markdown
         private readonly IMetadataWriter<IMethodMetadata> _methodWriter;
         private readonly IMetadataWriter<IConstructorMetadata> _constructorWriter;
         private readonly IMetadataWriter<IFieldMetadata> _fieldWriter;
+        private readonly IMetadataWriter<IPropertyMetadata> _propertyWriter;
 
         public TypeMetaWriter(IMarkdownWriter writer,
             ISignatureFactory signatureFactory,
             IDocsUrlResolver urlResolver,
             Func<IMarkdownWriter, IMetadataWriter<IMethodMetadata>> methodWriterFactory,
             Func<IMarkdownWriter, IMetadataWriter<IConstructorMetadata>> constructorWriterFactory,
-            Func<IMarkdownWriter, IMetadataWriter<IFieldMetadata>> fieldWriterFactory)
+            Func<IMarkdownWriter, IMetadataWriter<IFieldMetadata>> fieldWriterFactory,
+            Func<IMarkdownWriter, IMetadataWriter<IPropertyMetadata>> propertyWriterFactory)
         {
             _writer = writer;
             _signatureFactory = signatureFactory;
@@ -29,6 +31,7 @@ namespace MarkdownDocs.Markdown
             _methodWriter = methodWriterFactory(writer);
             _constructorWriter = constructorWriterFactory(writer);
             _fieldWriter = fieldWriterFactory(writer);
+            _propertyWriter = propertyWriterFactory(writer);
         }
 
         public async Task WriteAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken = default)
@@ -50,6 +53,7 @@ namespace MarkdownDocs.Markdown
 
             await WriteConstructorsAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
             await WriteFieldsAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
+            await WritePropertiesAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
 
             if (type.Category != TypeCategory.Delegate)
             {
@@ -131,6 +135,20 @@ namespace MarkdownDocs.Markdown
                 foreach (IFieldMetadata field in fields)
                 {
                     await _fieldWriter.WriteAsync(field, indent + 1, cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private async Task WritePropertiesAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken)
+        {
+            List<IPropertyMetadata> properties = type.Properties.OrderBy(f => f.Name).ToList();
+            if (properties.Count > 0)
+            {
+                _writer.WriteHeading("Properties", indent);
+
+                foreach (IPropertyMetadata property in properties)
+                {
+                    await _propertyWriter.WriteAsync(property, indent + 1, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

@@ -14,6 +14,7 @@ namespace MarkdownDocs
         string CreateDelegate(ITypeMetadata type);
         string CreateType(ITypeMetadata type);
         string CreateField(IFieldMetadata field);
+        string CreateProperty(IPropertyMetadata property);
     }
 
     public class SignatureFactory : ISignatureFactory
@@ -38,6 +39,15 @@ namespace MarkdownDocs
         {
             string assignValue = !string.IsNullOrWhiteSpace(field.RawValue) ? $" = {field.RawValue}" : string.Empty;
             string result = $"{field.AccessModifier.ToMarkdown()} {field.FieldModifier.ToMarkdown()} {_urlResolver.GetTypeName(field.Type, field.Owner, true)} {field.Name}{assignValue};".Clean();
+            return result;
+        }
+
+        public string CreateProperty(IPropertyMetadata property)
+        {
+            string assignValue = !string.IsNullOrWhiteSpace(property.RawValue) ? $" = {property.RawValue};" : string.Empty;
+            string getMethod = property.GetMethodModifier == AccessModifier.Protected && property.AccessModifier != AccessModifier.Protected ? "protected get;" : "get;";
+            string setMethod = property.SetMethodModifier == AccessModifier.Protected && property.AccessModifier != AccessModifier.Protected ? "protected set;" : "set;";
+            string result = $"{property.AccessModifier.ToMarkdown()} {property.PropertyModifier.ToMarkdown()} {_urlResolver.GetTypeName(property.Type, property.Owner, true)} {property.Name} {{ {getMethod} {setMethod} }}{assignValue}".Clean();
             return result;
         }
 

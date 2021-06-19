@@ -71,6 +71,7 @@ namespace MarkdownDocs.Context
         public void Derive(ITypeContext context)
         {
             ITypeMetadata type = context.GetMetadata();
+
             if (_derived.Add(type))
             {
                 if (type.Category == TypeCategory.Interface)
