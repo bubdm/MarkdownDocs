@@ -1,4 +1,5 @@
 ﻿using MarkdownDocs.Metadata;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -11,12 +12,14 @@ namespace MarkdownDocs.Markdown
         private readonly IMarkdownWriter _writer;
         private readonly ISignatureFactory _signatureFactory;
         private readonly IDocsUrlResolver _urlResolver;
+        private readonly IMetadataWriter<IParameterMetadata> _parameterWriter;
 
-        public MethodMetaWriter(IMarkdownWriter writer, ISignatureFactory signatureFactory, IDocsUrlResolver urlResolver)
+        public MethodMetaWriter(IMarkdownWriter writer, ISignatureFactory signatureFactory, IDocsUrlResolver urlResolver, Func<IMarkdownWriter, IMetadataWriter<IParameterMetadata>> parameterWriter)
         {
             _writer = writer;
             _signatureFactory = signatureFactory;
             _urlResolver = urlResolver;
+            _parameterWriter = parameterWriter(writer);
         }
 
         public async Task WriteAsync(IMethodMetadata method, uint indent, CancellationToken cancellationToken)
@@ -25,7 +28,7 @@ namespace MarkdownDocs.Markdown
             WriteSummary(method);
             WriteSignature(method);
 
-            await WriteParameters(method);
+            await WriteParameters(method, indent, cancellationToken);
 
             if (method.ReturnType.Name != typeof(void).Name)
             {
@@ -51,7 +54,7 @@ namespace MarkdownDocs.Markdown
             _writer.WriteHeading($"{name}({parameters})", indent);
         }
 
-        private async Task WriteParameters(IMethodMetadata method)
+        private async Task WriteParameters(IMethodMetadata method, uint indent, CancellationToken cancellationToken)
         {
             List<IParameterMetadata> parameters = method.Parameters.ToList();
             if (parameters.Count > 0)
@@ -60,20 +63,9 @@ namespace MarkdownDocs.Markdown
 
                 foreach (IParameterMetadata parameter in parameters)
                 {
-                    _writer.WriteCode(parameter.Name);
-                    _writer.Write(" ");
-
-                    string typeLink = parameter.Type.Link(method.Owner, _urlResolver);
-                    _writer.WriteLine(typeLink);
-
-                    WriteSummary(parameter);
+                    await _parameterWriter.WriteAsync(parameter, indent, cancellationToken);
                 }
             }
-        }
-
-        private void WriteSummary(IParameterMetadata parameter)
-        {
-
         }
 
         private void WriteSummary(IMethodMetadata method)

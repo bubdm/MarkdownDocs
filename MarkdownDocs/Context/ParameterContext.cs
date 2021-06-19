@@ -13,8 +13,9 @@ namespace MarkdownDocs.Context
         }
 
         public int Id { get; }
-        public ITypeMetadata Type { get; private set; } = default!;
         public string? Name { get; set; }
+        public ITypeMetadata Type { get; private set; } = default!;
+        public ITypeMetadata Owner => _owner.GetMetadata();
 
         public IParameterMetadata GetMetadata() => this;
 

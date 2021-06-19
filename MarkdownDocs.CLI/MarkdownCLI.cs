@@ -44,12 +44,14 @@ namespace MarkdownDocs.CLI
             IDocsWriter docsWriter = new DocsWriter(WriterFactory, TypeWriterFactory);
             return new MarkdownCLI(options, assemblyResolver, docsWriter);
 
+            IMetadataWriter<IParameterMetadata> ParameterWriterFactory(IMarkdownWriter writer) => new ParameterMetaWriter(writer, urlResolver);
+            IMetadataWriter<IMethodMetadata> MethodWriterFactory(IMarkdownWriter writer) => new MethodMetaWriter(writer, signatureFactory, urlResolver, ParameterWriterFactory);
+            IMetadataWriter<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new TypeMetaWriter(writer, signatureFactory, urlResolver, MethodWriterFactory);
+
             static IMarkdownWriter WriterFactory(StreamWriter stream) => new MarkdownWriter(stream);
             static IParameterResolver ParameterResolverFactory(IMethodContext context, ITypeResolver typeResolver) => new ParameterResolver(context, typeResolver);
             static IMethodResolver MethodResolverFactory(ITypeResolver typeResolver, ITypeContext context) => new MethodResolver(typeResolver, context, ParameterResolverFactory);
             static ITypeResolver TypeResolverFactory(IAssemblyContext builder) => new TypeResolver(builder, MethodResolverFactory);
-            IMetadataWriter<IMethodMetadata> MethodWriterFactory(IMarkdownWriter writer) => new MethodMetaWriter(writer, signatureFactory, urlResolver);
-            IMetadataWriter<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new TypeMetaWriter(writer, signatureFactory, urlResolver, MethodWriterFactory);
         }
     }
 }
