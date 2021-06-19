@@ -14,13 +14,12 @@ namespace MarkdownDocs.Context
 
     public class FieldContext : MemberMetadata, IFieldMetadata, IFieldContext
     {
-        public ITypeContext Context { get; }
-
         public FieldContext(int id, ITypeContext context) : base(id, context.GetMetadata())
         {
             Context = context;
         }
 
+        public ITypeContext Context { get; }
         public string? RawValue { get; set; }
         public FieldModifier FieldModifier { get; set; }
         public ITypeMetadata Type { get; private set; } = default!;

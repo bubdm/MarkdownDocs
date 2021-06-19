@@ -3,8 +3,9 @@
     public interface IMemberMetadata
     {
         int Id { get; }
-        ITypeMetadata Owner { get; }
         string Name { get; }
+        // Type containing the field, property or event
+        ITypeMetadata Owner { get; }
         AccessModifier AccessModifier { get; }
     }
 }

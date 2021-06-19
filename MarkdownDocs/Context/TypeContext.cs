@@ -13,6 +13,7 @@ namespace MarkdownDocs.Context
         private readonly Dictionary<int, IFieldContext> _fields = new Dictionary<int, IFieldContext>();
         private readonly Dictionary<int, IPropertyContext> _properties = new Dictionary<int, IPropertyContext>();
         private readonly Dictionary<int, IMethodContext> _methods = new Dictionary<int, IMethodContext>();
+        private readonly Dictionary<int, IEventContext> _events = new Dictionary<int, IEventContext>();
 
         private readonly HashSet<ITypeMetadata> _implemented = new HashSet<ITypeMetadata>();
         private readonly HashSet<ITypeMetadata> _derived = new HashSet<ITypeMetadata>();
@@ -27,6 +28,7 @@ namespace MarkdownDocs.Context
         public IEnumerable<IConstructorMetadata> Constructors => _constructors.Values.Select(m => m.GetMetadata());
         public IEnumerable<IPropertyMetadata> Properties => _properties.Values.Select(m => m.GetMetadata());
         public IEnumerable<IMethodMetadata> Methods => _methods.Values.Select(m => m.GetMetadata());
+        public IEnumerable<IEventMetadata> Events => _events.Values.Select(m => m.GetMetadata());
 
         public int Id { get; private set; }
         public string Name { get; set; } = default!;
@@ -137,9 +139,17 @@ namespace MarkdownDocs.Context
             return newMethod;
         }
 
-        public EventMetadata Event(int id)
+        public IEventContext Event(int id)
         {
-            return default;
+            if (_events.TryGetValue(id, out var ev))
+            {
+                return ev;
+            }
+
+            var newEvent = new EventContext(id, this);
+            _events.Add(id, newEvent);
+
+            return newEvent;
         }
 
         public ITypeMetadata GetMetadata()

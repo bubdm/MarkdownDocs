@@ -24,5 +24,6 @@ namespace MarkdownDocs.Metadata
         IEnumerable<IFieldMetadata> Fields { get; }
         IEnumerable<IPropertyMetadata> Properties { get; }
         IEnumerable<IMethodMetadata> Methods { get; }
+        IEnumerable<IEventMetadata> Events { get; }
     }
 }

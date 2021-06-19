@@ -17,11 +17,13 @@ namespace MarkdownDocs.Context
         IFieldContext Field(int id);
         IPropertyContext Property(int id);
         IMethodContext Method(int id);
-        EventMetadata Event(int id);
+        IEventContext Event(int id);
+
         void Inherit(ITypeContext type);
         void Derive(ITypeContext type);
         void Implement(ITypeContext type);
         void Reference(ITypeContext type);
+
         ITypeMetadata GetMetadata();
     }
 }

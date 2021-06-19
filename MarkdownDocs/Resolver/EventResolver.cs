@@ -4,12 +4,27 @@ using System.Reflection;
 
 namespace MarkdownDocs.Resolver
 {
-    public static class EventResolver
+    public interface IEventResolver
     {
-        public static EventMetadata Event(this IAssemblyContext builder, in ITypeContext typeMeta, in EventInfo ev)
+        IEventContext Resolve(EventInfo ev);
+    }
+
+    public class EventResolver : IEventResolver
+    {
+        private readonly ITypeContext _typeContext;
+        private readonly ITypeResolver _typeResolver;
+
+        public EventResolver(ITypeContext typeContext, ITypeResolver typeResolver)
         {
-            EventMetadata eventMeta = typeMeta.Event(ev.GetHashCode());
-            return eventMeta;
+            _typeContext = typeContext;
+            _typeResolver = typeResolver;
+        }
+
+        public IEventContext Resolve(EventInfo ev)
+        {
+            IEventContext context = _typeContext.Event(ev.GetHashCode());
+
+            return context;
         }
     }
 }

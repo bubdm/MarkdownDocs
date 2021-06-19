@@ -15,13 +15,13 @@ namespace MarkdownDocs.Context
     {
         private readonly Dictionary<int, IParameterContext> _parameters = new Dictionary<int, IParameterContext>();
 
-        public IEnumerable<IParameterMetadata> Parameters => _parameters.Values.Select(p => p.GetMetadata());
-        public ITypeContext Context { get; }
-
         public MethodBaseContext(int id, ITypeContext context) : base(id, context.GetMetadata())
         {
             Context = context;
         }
+
+        public IEnumerable<IParameterMetadata> Parameters => _parameters.Values.Select(p => p.GetMetadata());
+        public ITypeContext Context { get; }
 
         public IParameterContext Parameter(int id)
         {
