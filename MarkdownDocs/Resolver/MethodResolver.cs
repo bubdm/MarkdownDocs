@@ -27,15 +27,14 @@ namespace MarkdownDocs.Resolver
         public IMethodContext Resolve(MethodInfo method)
         {
             IMethodContext context = _typeContext.Method(method.GetHashCode());
-            IMethodMetadata meta = context.GetMetadata();
 
             if (method.IsGenericMethod)
             {
-                meta.Name = method.Name.Split('`')[0] + "<" + string.Join(", ", method.GetGenericArguments().Select(t => t.ToPrettyName()).ToArray()) + ">";
+                context.Name = method.Name.Split('`')[0] + "<" + string.Join(", ", method.GetGenericArguments().Select(t => t.ToPrettyName()).ToArray()) + ">";
             }
             else
             {
-                meta.Name = method.Name;
+                context.Name = method.Name;
             }
 
             if (method.IsVirtual)
@@ -43,29 +42,29 @@ namespace MarkdownDocs.Resolver
                 MethodInfo baseMethod = method.GetBaseDefinition();
                 if (baseMethod != method)
                 {
-                    meta.MethodModifier = MethodModifier.Override;
+                    context.MethodModifier = MethodModifier.Override;
                 }
                 else
                 {
-                    meta.MethodModifier = MethodModifier.Virtual;
+                    context.MethodModifier = MethodModifier.Virtual;
                 }
             }
             else if(method.IsAbstract)
             {
-                meta.MethodModifier = MethodModifier.Abstract;
+                context.MethodModifier = MethodModifier.Abstract;
             }
             else if (method.IsStatic)
             {
-                meta.MethodModifier = MethodModifier.Static;
+                context.MethodModifier = MethodModifier.Static;
             }
 
             if (method.IsPublic)
             {
-                meta.AccessModifier = AccessModifier.Public;
+                context.AccessModifier = AccessModifier.Public;
             }
             else if (method.IsFamily)
             {
-                meta.AccessModifier = AccessModifier.Protected;
+                context.AccessModifier = AccessModifier.Protected;
             }
 
             IParameterResolver resolver = _parameterResolverFactory(context, _typeResolver);

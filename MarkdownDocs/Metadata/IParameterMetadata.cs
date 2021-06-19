@@ -3,7 +3,7 @@
     public interface IParameterMetadata
     {
         int Id { get; }
-        string? Name { get; set; }
+        string? Name { get; }
         ITypeMetadata Type { get; }
         // Type containing the method or constructor
         ITypeMetadata Owner { get; }

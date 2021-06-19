@@ -13,8 +13,6 @@ namespace MarkdownDocs.Context
         {
         }
 
-        public bool IsVirtual { get; set; }
-
         public IPropertyMetadata GetMetadata() => this;
     }
 }

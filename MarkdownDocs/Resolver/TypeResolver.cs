@@ -28,9 +28,8 @@ namespace MarkdownDocs.Resolver
             {
                 // If it's a generic parameter or generic return type resolve it in another context
                 ITypeContext context = CreateContext().ResolveRecursive(type);
-                ITypeMetadata meta = context.GetMetadata();
 
-                meta.Assembly = string.Empty;
+                context.Assembly = string.Empty;
                 return context;
             }
 
@@ -41,17 +40,16 @@ namespace MarkdownDocs.Resolver
         private ITypeContext ResolveRecursive(Type type)
         {
             ITypeContext context = _assemblyContext.Type(type.GetHashCode());
-            ITypeMetadata meta = context.GetMetadata();
 
             // Type was not previously resolved
-            if (string.IsNullOrEmpty(meta.Name))
+            if (string.IsNullOrEmpty(context.Name))
             {
-                meta.Name = type.ToPrettyName();
-                meta.Namespace = type.Namespace;
-                meta.Assembly = type.Assembly.GetName().Name;
-                meta.Company = GetCompanyName(type);
-                meta.Category = GetCategory(type);
-                meta.Modifier = GetModifier(type);
+                context.Name = type.ToPrettyName();
+                context.Namespace = type.Namespace;
+                context.Assembly = type.Assembly.GetName().Name;
+                context.Company = GetCompanyName(type);
+                context.Category = GetCategory(type);
+                context.Modifier = GetModifier(type);
 
                 IEnumerable<Type> interfaces = GetImmediateInterfaces(type);
                 foreach (Type interf in interfaces)
@@ -67,7 +65,7 @@ namespace MarkdownDocs.Resolver
                     context.Inherit(baseMeta);
                 }
 
-                if (meta.Category == TypeCategory.Delegate)
+                if (context.Category == TypeCategory.Delegate)
                 {
                     MethodInfo? invoke = type.GetMethod("Invoke");
                     if (invoke != null)

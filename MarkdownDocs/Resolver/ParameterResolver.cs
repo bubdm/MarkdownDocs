@@ -24,7 +24,7 @@ namespace MarkdownDocs.Resolver
         {
             IParameterContext context = _context.Parameter(parameter.GetHashCode());
             IParameterMetadata meta = context.GetMetadata();
-            meta.Name = parameter.Name;
+            context.Name = parameter.Name;
 
             ITypeContext type = _typeResolver.Resolve(parameter.ParameterType);
             context.ParameterType(type);

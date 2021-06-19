@@ -26,10 +26,9 @@ namespace MarkdownDocs.Resolver
         public IConstructorContext Resolve(ConstructorInfo constructor)
         {
             IConstructorContext context = _typeContext.Constructor(constructor.GetHashCode());
-            IConstructorMetadata meta = context.GetMetadata();
 
-            meta.Name = constructor.DeclaringType!.Name;
-            meta.AccessModifier = constructor.IsPublic ? AccessModifier.Public : AccessModifier.Protected;
+            context.Name = constructor.DeclaringType!.Name;
+            context.AccessModifier = constructor.IsPublic ? AccessModifier.Public : AccessModifier.Protected;
 
             IParameterResolver resolver = _parameterResolverFactory(context, _typeResolver);
             foreach (ParameterInfo param in constructor.GetParameters())

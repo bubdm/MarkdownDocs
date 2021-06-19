@@ -6,6 +6,6 @@ namespace MarkdownDocs.Metadata
     {
         IEnumerable<IParameterMetadata> Parameters { get; }
         ITypeMetadata ReturnType { get; }
-        MethodModifier MethodModifier { get; set; }
+        MethodModifier MethodModifier { get; }
     }
 }

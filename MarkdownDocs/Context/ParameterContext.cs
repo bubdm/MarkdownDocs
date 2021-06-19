@@ -4,6 +4,7 @@ namespace MarkdownDocs.Context
 {
     public interface IParameterContext
     {
+        string? Name { get; set; }
         void ParameterType(ITypeContext type);
         IParameterMetadata GetMetadata();
     }

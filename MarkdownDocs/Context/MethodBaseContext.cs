@@ -6,6 +6,8 @@ namespace MarkdownDocs.Context
 {
     public interface IMethodBaseContext
     {
+        string Name { get; set; }
+        AccessModifier AccessModifier { get; set; }
         IParameterContext Parameter(int id);
     }
 

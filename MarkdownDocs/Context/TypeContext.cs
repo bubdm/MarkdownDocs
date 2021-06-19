@@ -6,20 +6,6 @@ using System.Linq;
 
 namespace MarkdownDocs.Context
 {
-    public interface ITypeContext
-    {
-        IConstructorContext Constructor(int id);
-        FieldMetadata Field(int id);
-        IPropertyContext Property(int id);
-        IMethodContext Method(int id);
-        EventMetadata Event(int id);
-        void Inherit(ITypeContext type);
-        void Derive(ITypeContext type);
-        void Implement(ITypeContext type);
-        void Reference(ITypeContext type);
-        ITypeMetadata GetMetadata();
-    }
-
     [DebuggerDisplay("{FullName}")]
     public class TypeContext : ITypeContext, ITypeMetadata
     {
