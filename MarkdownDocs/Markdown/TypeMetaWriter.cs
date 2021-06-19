@@ -1,4 +1,5 @@
 ﻿using MarkdownDocs.Metadata;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -6,28 +7,26 @@ using System.Threading.Tasks;
 
 namespace MarkdownDocs.Markdown
 {
-    public class MarkdownTypeWriter : IMarkdownMetadataWriter<ITypeMetadata>
+    public class TypeMetaWriter : IMetadataWriter<ITypeMetadata>
     {
         private readonly IMarkdownWriter _writer;
         private readonly ISignatureFactory _signatureFactory;
         private readonly IDocsUrlResolver _urlResolver;
-        private readonly IDocsOptions _options;
-        private readonly uint _baseHeadingLevel;
+        private readonly IMetadataWriter<IMethodMetadata> _methodWriter;
 
-        public MarkdownTypeWriter(IMarkdownWriter writer, ISignatureFactory signatureFactory, IDocsUrlResolver urlResolver, IDocsOptions options)
+        public TypeMetaWriter(IMarkdownWriter writer, ISignatureFactory signatureFactory, IDocsUrlResolver urlResolver, Func<IMarkdownWriter, IMetadataWriter<IMethodMetadata>> methodWriterFactory)
         {
             _writer = writer;
             _signatureFactory = signatureFactory;
             _urlResolver = urlResolver;
-            _options = options;
-            _baseHeadingLevel = options.IsCompact ? 2u : 1u;
+            _methodWriter = methodWriterFactory(writer);
         }
 
-        public async Task WriteAsync(ITypeMetadata type, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            _writer.WriteHeading($"{type.Name} {type.Category}", _baseHeadingLevel);
+            _writer.WriteHeading($"{type.Name} {type.Category}", indent);
             _writer.WriteLine($"{"Namespace:".Bold()} {type.Namespace}");
             _writer.WriteLine($"{"Assembly:".Bold()} {type.Assembly}");
 
@@ -42,21 +41,11 @@ namespace MarkdownDocs.Markdown
 
             if (type.Category != TypeCategory.Delegate)
             {
-                WriteMethods(type);
+                await WriteMethodsAsync(type, indent + 1, cancellationToken);
             }
         }
 
         private void WriteSummary(ITypeMetadata type)
-        {
-
-        }
-
-        private void WriteSummary(IMethodMetadata method)
-        {
-
-        }
-
-        private void WriteSummary(IParameterMetadata parameter)
         {
 
         }
@@ -67,15 +56,6 @@ namespace MarkdownDocs.Markdown
             {
                 string typeSignature = _signatureFactory.CreateType(type);
                 _writer.Write(typeSignature);
-            }
-        }
-
-        private void WriteSignature(IMethodMetadata method)
-        {
-            using (_writer.WriteCodeBlock())
-            {
-                string methodSignature = _signatureFactory.CreateMethod(method);
-                _writer.Write(methodSignature);
             }
         }
 
@@ -106,53 +86,16 @@ namespace MarkdownDocs.Markdown
             }
         }
 
-        private void WriteMethods(ITypeMetadata type)
+        private async Task WriteMethodsAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken)
         {
-            List<IMethodMetadata> methods = type.Methods.ToList();
+            List<IMethodMetadata> methods = type.Methods.OrderBy(m => m.Name).ToList();
             if (methods.Count > 0)
             {
-                _writer.WriteHeading("Methods", _baseHeadingLevel + 1);
+                _writer.WriteHeading("Methods", indent);
 
                 foreach (IMethodMetadata method in methods)
                 {
-                    WriteTitle(method);
-                    WriteSummary(method);
-                    WriteSignature(method);
-                    WriteParameters(method);
-
-                    if (method.ReturnType.Name != typeof(void).Name)
-                    {
-                        _writer.WriteLine("Returns".Bold());
-                        string typeLink = method.ReturnType.Link(method.Owner, _urlResolver);
-                        _writer.WriteLine(typeLink);
-                    }
-                }
-            }
-        }
-
-        private void WriteTitle(IMethodMetadata method)
-        {
-            string parameters = string.Join(", ", method.Parameters.Select(p => _urlResolver.GetTypeName(p.Type, method.Owner)));
-            string name = method.Name.Sanitize();
-            _writer.WriteHeading($"{name}({parameters})", _baseHeadingLevel + 2);
-        }
-
-        private void WriteParameters(IMethodMetadata method)
-        {
-            List<IParameterMetadata> parameters = method.Parameters.ToList();
-            if (parameters.Count > 0)
-            {
-                _writer.WriteLine("Parameters".Bold());
-
-                foreach (IParameterMetadata parameter in parameters)
-                {
-                    _writer.WriteCode(parameter.Name);
-                    _writer.Write(" ");
-
-                    string typeLink = parameter.Type.Link(method.Owner, _urlResolver);
-                    _writer.WriteLine(typeLink);
-
-                    WriteSummary(parameter);
+                    await _methodWriter.WriteAsync(method, indent + 1, cancellationToken);
                 }
             }
         }
