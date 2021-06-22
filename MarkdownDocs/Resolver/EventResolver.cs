@@ -24,6 +24,24 @@ namespace MarkdownDocs.Resolver
         {
             IEventContext context = _typeContext.Event(ev.GetHashCode());
 
+            MethodInfo? addMethod = ev.AddMethod;
+            MethodInfo? removeMethod = ev.RemoveMethod;
+
+            context.Name = ev.Name;
+            context.AddMethodModifier = addMethod?.GetAccessModifier();
+            context.RemoveMethodModifier = removeMethod?.GetAccessModifier();
+
+            MethodModifier? addModifier = addMethod?.GetMethodModifier();
+            MethodModifier? removeModifier = removeMethod?.GetMethodModifier();
+
+            context.EventModifier = addModifier ?? removeModifier ?? MethodModifier.None;
+
+            if (ev.EventHandlerType != null)
+            {
+                ITypeContext evType = _typeResolver.Resolve(ev.EventHandlerType);
+                context.EventType(evType);
+            }
+
             return context;
         }
     }

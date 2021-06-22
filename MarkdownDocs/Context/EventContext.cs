@@ -4,6 +4,11 @@ namespace MarkdownDocs.Context
 {
     public interface IEventContext
     {
+        string Name { get; set; }
+        AccessModifier? RemoveMethodModifier { get; set; }
+        AccessModifier? AddMethodModifier { get; set; }
+        MethodModifier EventModifier { get; set; }
+
         void EventType(ITypeContext type);
         IEventMetadata GetMetadata();
     }
@@ -17,6 +22,13 @@ namespace MarkdownDocs.Context
 
         public ITypeContext Context { get; }
         public ITypeMetadata Type { get; private set; } = default!;
+        public AccessModifier? RemoveMethodModifier { get; set; }
+        public AccessModifier? AddMethodModifier { get; set; }
+        public MethodModifier EventModifier { get; set; }
+
+        public override AccessModifier AccessModifier => AddMethodModifier == AccessModifier.Public || RemoveMethodModifier == AccessModifier.Public
+                ? AccessModifier.Public
+                : AddMethodModifier ?? RemoveMethodModifier ?? AccessModifier.Unknown;
 
         public void EventType(ITypeContext type)
         {

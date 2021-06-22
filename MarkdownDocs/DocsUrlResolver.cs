@@ -1,4 +1,5 @@
-﻿using MarkdownDocs.Metadata;
+﻿using MarkdownDocs.Markdown;
+using MarkdownDocs.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -48,20 +49,20 @@ namespace MarkdownDocs
             {
                 if (type.Company.Contains(Microsoft, StringComparison.OrdinalIgnoreCase))
                 {
-                    return $"{MicrosoftDocsUrl}{type.FullName}";
+                    return $"{MicrosoftDocsUrl}{type.FullName}".Sanitize();
                 }
             }
 
             if (_options.IsCompact)
             {
-                return $"#{type.Name}-{type.Category}".ToLowerInvariant();
+                return $"#{type.Name}-{type.Category}".Sanitize().ToLowerInvariant();
             }
 
             string link = string.IsNullOrWhiteSpace(baseUrl) ? type.Name : $"{baseUrl}/{type.Name}";
-            return link;
+            return link.Sanitize();
         }
 
-        private string GetNullableName(string name)
+        private static string GetNullableName(string name)
         {
             GroupCollection groups = Regex.Match(name, @"Nullable<(.*)>").Groups;
             if (groups.Count == 2)

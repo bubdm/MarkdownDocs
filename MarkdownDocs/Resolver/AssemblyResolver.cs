@@ -1,5 +1,4 @@
 ﻿using MarkdownDocs.Context;
-using MarkdownDocs.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,19 +16,22 @@ namespace MarkdownDocs.Resolver
         private readonly Func<ITypeContext, ITypeResolver, IConstructorResolver> _constructorResolverFactory;
         private readonly Func<ITypeContext, ITypeResolver, IFieldResolver> _fieldResolverFactory;
         private readonly Func<ITypeContext, ITypeResolver, IPropertyResolver> _propertyResolverFactory;
+        private readonly Func<ITypeContext, ITypeResolver, IEventResolver> _eventResolverFactory;
 
         public AssemblyResolver(IAssemblyContext assemblyBuilder,
             Func<IAssemblyContext, ITypeResolver> typeResolver,
             Func<ITypeContext, ITypeResolver, IMethodResolver> methodResolverFactory,
             Func<ITypeContext, ITypeResolver, IConstructorResolver> constructorResolverFactory,
             Func<ITypeContext, ITypeResolver, IFieldResolver> fieldResolverFactory,
-            Func<ITypeContext, ITypeResolver, IPropertyResolver> propertyResolverFactory)
+            Func<ITypeContext, ITypeResolver, IPropertyResolver> propertyResolverFactory,
+            Func<ITypeContext, ITypeResolver, IEventResolver> eventResolverFactory)
         {
             _assemblyBuilder = assemblyBuilder;
             _methodResolverFactory = methodResolverFactory;
             _constructorResolverFactory = constructorResolverFactory;
             _fieldResolverFactory = fieldResolverFactory;
             _propertyResolverFactory = propertyResolverFactory;
+            _eventResolverFactory = eventResolverFactory;
             _typeResolver = typeResolver(assemblyBuilder);
         }
 
@@ -56,7 +58,7 @@ namespace MarkdownDocs.Resolver
                 Task.Run(() =>
                 {
                     IConstructorResolver constructorResolver = _constructorResolverFactory(context, _typeResolver);
-                    foreach (ConstructorInfo ctor in type.GetConstructors(searchFlags).Where(m => (m.IsPublic || m.IsFamily) && !m.DeclaringType!.IsSubclassOf(typeof(Delegate)) && m.GetParameters().Length > 0))
+                    foreach (ConstructorInfo ctor in type.GetConstructors(searchFlags).Where(m => (m.IsPublic || m.IsFamily) && !m.DeclaringType!.IsSubclassOf(typeof(Delegate))))
                     {
                         constructorResolver.Resolve(ctor);
                     }
@@ -105,9 +107,10 @@ namespace MarkdownDocs.Resolver
                 // Resolve events
                 Task.Run(() =>
                 {
+                    IEventResolver eventResolver = _eventResolverFactory(context, _typeResolver);
                     foreach (EventInfo ev in type.GetEvents(searchFlags).Where(m => ((m.AddMethod?.IsPublic ?? false) || (m.AddMethod?.IsFamily ?? false)) && !m.IsSpecialName))
                     {
-                        //_assemblyBuilder.Event(typeRef, ev);
+                        eventResolver.Resolve(ev);
                     }
                 }, cancellationToken)
             };

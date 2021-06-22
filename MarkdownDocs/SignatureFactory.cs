@@ -15,6 +15,7 @@ namespace MarkdownDocs
         string CreateType(ITypeMetadata type);
         string CreateField(IFieldMetadata field);
         string CreateProperty(IPropertyMetadata property);
+        string CreateEvent(IEventMetadata ev);
     }
 
     public class SignatureFactory : ISignatureFactory
@@ -62,6 +63,12 @@ namespace MarkdownDocs
         {
             string assignValue = !string.IsNullOrWhiteSpace(parameter.RawValue) ? $" = {parameter.RawValue}" : string.Empty;
             string result = $"{_urlResolver.GetTypeName(parameter.Type, true)} {parameter.Name}{assignValue}".Clean();
+            return result;
+        }
+
+        public string CreateEvent(IEventMetadata ev)
+        {
+            string result = $"{ev.AccessModifier.ToMarkdown()} {ev.EventModifier.ToMarkdown()} event {_urlResolver.GetTypeName(ev.Type, ev.Owner, true)} {ev.Name};".Clean();
             return result;
         }
 

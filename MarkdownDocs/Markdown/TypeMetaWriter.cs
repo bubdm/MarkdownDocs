@@ -16,6 +16,7 @@ namespace MarkdownDocs.Markdown
         private readonly IMetadataWriter<IConstructorMetadata> _constructorWriter;
         private readonly IMetadataWriter<IFieldMetadata> _fieldWriter;
         private readonly IMetadataWriter<IPropertyMetadata> _propertyWriter;
+        private readonly IMetadataWriter<IEventMetadata> _eventWriter;
 
         public TypeMetaWriter(IMarkdownWriter writer,
             ISignatureFactory signatureFactory,
@@ -23,7 +24,8 @@ namespace MarkdownDocs.Markdown
             Func<IMarkdownWriter, IMetadataWriter<IMethodMetadata>> methodWriterFactory,
             Func<IMarkdownWriter, IMetadataWriter<IConstructorMetadata>> constructorWriterFactory,
             Func<IMarkdownWriter, IMetadataWriter<IFieldMetadata>> fieldWriterFactory,
-            Func<IMarkdownWriter, IMetadataWriter<IPropertyMetadata>> propertyWriterFactory)
+            Func<IMarkdownWriter, IMetadataWriter<IPropertyMetadata>> propertyWriterFactory,
+            Func<IMarkdownWriter, IMetadataWriter<IEventMetadata>> eventWriterFactory)
         {
             _writer = writer;
             _signatureFactory = signatureFactory;
@@ -32,6 +34,7 @@ namespace MarkdownDocs.Markdown
             _constructorWriter = constructorWriterFactory(writer);
             _fieldWriter = fieldWriterFactory(writer);
             _propertyWriter = propertyWriterFactory(writer);
+            _eventWriter = eventWriterFactory(writer);
         }
 
         public async Task WriteAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken = default)
@@ -59,6 +62,8 @@ namespace MarkdownDocs.Markdown
             {
                 await WriteMethodsAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
             }
+
+            await WriteEventsAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
         }
 
         private void WriteSignature(ITypeMetadata type)
@@ -149,6 +154,20 @@ namespace MarkdownDocs.Markdown
                 foreach (IPropertyMetadata property in properties)
                 {
                     await _propertyWriter.WriteAsync(property, indent + 1, cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private async Task WriteEventsAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken)
+        {
+            List<IEventMetadata> events = type.Events.OrderBy(f => f.Name).ToList();
+            if (events.Count > 0)
+            {
+                _writer.WriteHeading("Events", indent);
+
+                foreach (IEventMetadata ev in events)
+                {
+                    await _eventWriter.WriteAsync(ev, indent + 1, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

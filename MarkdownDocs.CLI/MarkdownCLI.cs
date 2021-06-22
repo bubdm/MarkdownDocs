@@ -39,21 +39,23 @@ namespace MarkdownDocs.CLI
         {
             IDocsUrlResolver urlResolver = new DocsUrlResolver(options);
             IAssemblyContext assemblyContext = new AssemblyContext();
-            IAssemblyResolver assemblyResolver = new AssemblyResolver(assemblyContext, TypeResolverFactory, MethodResolverFactory, ConstructorResolverFactory, FieldResolverFactory, PropertyResolverFactory);
+            IAssemblyResolver assemblyResolver = new AssemblyResolver(assemblyContext, TypeResolverFactory, MethodResolverFactory, ConstructorResolverFactory, FieldResolverFactory, PropertyResolverFactory, EventResolverFactory);
             ISignatureFactory signatureFactory = new SignatureFactory(options, urlResolver);
 
             IDocsWriter docsWriter = new DocsWriter(WriterFactory, TypeWriterFactory);
             return new MarkdownCLI(options, assemblyResolver, docsWriter);
 
+            IMetadataWriter<IEventMetadata> EventWriterFactory(IMarkdownWriter writer) => new EventMetaWriter(writer, signatureFactory, urlResolver);
             IMetadataWriter<IPropertyMetadata> PropertyWriterFactory(IMarkdownWriter writer) => new PropertyMetaWriter(writer, signatureFactory, urlResolver);
             IMetadataWriter<IFieldMetadata> FieldWriterFactory(IMarkdownWriter writer) => new FieldMetaWriter(writer, signatureFactory, urlResolver);
             IMetadataWriter<IParameterMetadata> ParameterWriterFactory(IMarkdownWriter writer) => new ParameterMetaWriter(writer, urlResolver);
             IMetadataWriter<IConstructorMetadata> ConstructorWriterFactory(IMarkdownWriter writer) => new ConstructorMetaWriter(writer, signatureFactory, urlResolver, ParameterWriterFactory);
             IMetadataWriter<IMethodMetadata> MethodWriterFactory(IMarkdownWriter writer) => new MethodMetaWriter(writer, signatureFactory, urlResolver, ParameterWriterFactory);
-            IMetadataWriter<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new TypeMetaWriter(writer, signatureFactory, urlResolver, MethodWriterFactory, ConstructorWriterFactory, FieldWriterFactory, PropertyWriterFactory);
+            IMetadataWriter<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new TypeMetaWriter(writer, signatureFactory, urlResolver, MethodWriterFactory, ConstructorWriterFactory, FieldWriterFactory, PropertyWriterFactory, EventWriterFactory);
 
             static IMarkdownWriter WriterFactory(StreamWriter stream) => new MarkdownWriter(stream);
             static IParameterResolver ParameterResolverFactory(IMethodBaseContext context, ITypeResolver typeResolver) => new ParameterResolver(context, typeResolver);
+            static IEventResolver EventResolverFactory(ITypeContext context, ITypeResolver typeResolver) => new EventResolver(context, typeResolver);
             static IPropertyResolver PropertyResolverFactory(ITypeContext context, ITypeResolver typeResolver) => new PropertyResolver(context, typeResolver);
             static IFieldResolver FieldResolverFactory(ITypeContext context, ITypeResolver typeResolver) => new FieldResolver(context, typeResolver);
             static IConstructorResolver ConstructorResolverFactory(ITypeContext context, ITypeResolver typeResolver) => new ConstructorResolver(context, typeResolver, ParameterResolverFactory);

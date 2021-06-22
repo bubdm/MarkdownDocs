@@ -9,7 +9,6 @@ namespace MarkdownDocs.Context
         MethodModifier PropertyModifier { get; set; }
         AccessModifier? GetMethodModifier { get; set; }
         AccessModifier? SetMethodModifier { get; set; }
-        AccessModifier AccessModifier { get; set; }
 
         void PropertyType(ITypeContext type);
         IPropertyMetadata GetMetadata();
@@ -28,6 +27,10 @@ namespace MarkdownDocs.Context
         public MethodModifier PropertyModifier { get; set; }
         public AccessModifier? GetMethodModifier { get; set; }
         public AccessModifier? SetMethodModifier { get; set; }
+
+        public override AccessModifier AccessModifier => GetMethodModifier == AccessModifier.Public || SetMethodModifier == AccessModifier.Public
+                ? AccessModifier.Public
+                : GetMethodModifier ?? SetMethodModifier ?? AccessModifier.Unknown;
 
         public IPropertyMetadata GetMetadata() => this;
 

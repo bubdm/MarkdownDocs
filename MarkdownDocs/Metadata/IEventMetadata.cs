@@ -2,6 +2,7 @@
 {
     public interface IEventMetadata : IMemberMetadata
     {
+        MethodModifier EventModifier { get; }
         ITypeMetadata Type { get; }
     }
 }

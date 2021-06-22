@@ -31,15 +31,6 @@ namespace MarkdownDocs.Resolver
             context.GetMethodModifier = getMethod?.GetAccessModifier();
             context.SetMethodModifier = setMethod?.GetAccessModifier();
 
-            if (context.GetMethodModifier == AccessModifier.Public || context.SetMethodModifier == AccessModifier.Public)
-            {
-                context.AccessModifier = AccessModifier.Public;
-            }
-            else
-            {
-                context.AccessModifier = context.GetMethodModifier ?? context.SetMethodModifier ?? AccessModifier.Unknown;
-            }
-
             if (property.Attributes.HasFlag(PropertyAttributes.HasDefault))
             {
                 object? rawValue = property.GetRawConstantValue();

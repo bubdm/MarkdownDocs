@@ -11,6 +11,6 @@
         public int Id { get; }
         public ITypeMetadata Owner { get; }
         public string Name { get; set; } = default!;
-        public AccessModifier AccessModifier { get; set; }
+        public virtual AccessModifier AccessModifier { get; set; }
     }
 }
