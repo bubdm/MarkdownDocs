@@ -18,6 +18,11 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Nullable>enable</Nullable>
     <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/miroiu/MarkdownDocs</RepositoryUrl>
+    <PackageReleaseNotes>Initial release (for documenting Nodify https://miroiu.github.io/nodify/api)</PackageReleaseNotes> 
+    <!--<PackAsTool>true</PackAsTool>
+    <ToolCommandName>mdocs</ToolCommandName>-->
   </PropertyGroup>
 
   <ItemGroup>

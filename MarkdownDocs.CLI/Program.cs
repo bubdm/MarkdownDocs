@@ -38,7 +38,7 @@ namespace MarkdownDocs.CLI
 
         public static void PrintHelp()
         {
-            Console.WriteLine("markdown input -o output [--compact] [--noxml] [--parallel-writes]");
+            Console.WriteLine("mdocs input -o output [--compact] [--noxml] [--parallel-writes]");
             Console.WriteLine();
         }
 
