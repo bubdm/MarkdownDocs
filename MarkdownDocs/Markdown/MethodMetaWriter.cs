@@ -34,7 +34,13 @@ namespace MarkdownDocs.Markdown
             {
                 _writer.WriteLine("Returns".Bold());
                 string typeLink = method.ReturnType.Link(method.Owner, _urlResolver);
-                _writer.WriteLine(typeLink);
+                _writer.Write(typeLink);
+
+                if (!string.IsNullOrWhiteSpace(method.ReturnDescription))
+                {
+                    _writer.Write($": {method.ReturnDescription}");
+                }
+                _writer.WriteLine();
             }
         }
 
@@ -70,7 +76,10 @@ namespace MarkdownDocs.Markdown
 
         private void WriteSummary(IMethodMetadata method)
         {
-
+            if (!string.IsNullOrWhiteSpace(method.Description))
+            {
+                _writer.WriteLine(method.Description);
+            }
         }
     }
 }

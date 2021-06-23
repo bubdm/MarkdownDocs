@@ -2,9 +2,8 @@
 
 namespace MarkdownDocs.Context
 {
-    public interface ITypeContext
+    public interface ITypeContext : IDocContext
     {
-        string Name { get; set; }
         string? Namespace { get; set; }
         string? Assembly { get; set; }
         string? Company { get; set; }

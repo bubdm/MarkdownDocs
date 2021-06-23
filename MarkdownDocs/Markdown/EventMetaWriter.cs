@@ -43,7 +43,10 @@ namespace MarkdownDocs.Markdown
 
         private void WriteSummary(IEventMetadata ev)
         {
-
+            if (!string.IsNullOrWhiteSpace(ev.Description))
+            {
+                _writer.WriteLine(ev.Description);
+            }
         }
     }
 }

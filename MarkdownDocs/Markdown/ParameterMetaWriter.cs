@@ -21,16 +21,20 @@ namespace MarkdownDocs.Markdown
             _writer.Write(" ");
 
             string typeLink = parameter.Type.Link(parameter.Owner, _urlResolver);
-            _writer.WriteLine(typeLink);
+            _writer.Write(typeLink);
 
             WriteSummary(parameter);
+            _writer.WriteLine();
 
             return Task.CompletedTask;
         }
 
         private void WriteSummary(IParameterMetadata parameter)
         {
-
+            if (!string.IsNullOrWhiteSpace(parameter.Description))
+            {
+                _writer.Write($": {parameter.Description}");
+            }
         }
     }
 }

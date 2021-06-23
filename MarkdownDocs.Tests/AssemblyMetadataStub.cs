@@ -10,7 +10,7 @@ namespace MarkdownDocs.Tests
         private readonly Dictionary<int, ITypeContext> _types = new Dictionary<int, ITypeContext>();
         public IEnumerable<ITypeMetadata> Types => _types.Values.Select(t => t.GetMetadata());
 
-        public string? Name { get; private set; }
+        public string? Name { get; set; }
 
         public IAssemblyMetadata GetMetadata() => this;
 
@@ -24,12 +24,6 @@ namespace MarkdownDocs.Tests
             var newMeta = new TypeContext(id);
             _types.Add(id, newMeta);
             return newMeta;
-        }
-
-        public IAssemblyContext WithName(string? assemblyName)
-        {
-            Name = assemblyName;
-            return this;
         }
     }
 }

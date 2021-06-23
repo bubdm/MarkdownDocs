@@ -63,7 +63,10 @@ namespace MarkdownDocs.Markdown
 
         private void WriteSummary(IConstructorMetadata method)
         {
-
+            if (!string.IsNullOrWhiteSpace(method.Description))
+            {
+                _writer.WriteLine(method.Description);
+            }
         }
     }
 }

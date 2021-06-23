@@ -37,6 +37,33 @@ namespace MarkdownDocs.Markdown
             return name;
         }
 
+        public static string Link(this IMemberMetadata member, in ITypeMetadata relativeTo, in IDocsUrlResolver resolver)
+        {
+            ITypeMetadata type = member.Owner;
+            string name = resolver.GetTypeName(type, relativeTo);
+            string memberName = $"{name}.{member.Name}";
+            if (!string.IsNullOrWhiteSpace(type.Assembly))
+            {
+                string url = resolver.ResolveUrl(member);
+                return memberName.Link(url);
+            }
+
+            return memberName;
+        }
+
+        public static string Link(this string memberName, in ITypeMetadata type, in ITypeMetadata relativeTo, in IDocsUrlResolver resolver)
+        {
+            string name = resolver.GetTypeName(type, relativeTo);
+            string result = $"{name}.{memberName}";
+            if (!string.IsNullOrWhiteSpace(type.Assembly))
+            {
+                string url = resolver.ResolveUrl(memberName, type);
+                return result.Link(url);
+            }
+
+            return result;
+        }
+
         public static string ToMarkdown(this AccessModifier modifier)
             => modifier switch
             {

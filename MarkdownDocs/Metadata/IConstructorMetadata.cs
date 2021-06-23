@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-
-namespace MarkdownDocs.Metadata
+﻿namespace MarkdownDocs.Metadata
 {
-    public interface IConstructorMetadata : IMemberMetadata
+    public interface IConstructorMetadata : IMemberMetadata, IParameterizedMemberMetadata
     {
-        IEnumerable<IParameterMetadata> Parameters { get; }
     }
 }

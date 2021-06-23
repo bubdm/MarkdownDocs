@@ -1,9 +1,7 @@
 ﻿namespace MarkdownDocs.Metadata
 {
-    public interface IParameterMetadata
+    public interface IParameterMetadata : IDocMetadata
     {
-        int Id { get; }
-        string? Name { get; }
         string? RawValue { get; }
         ITypeMetadata Type { get; }
         // Type containing the method or constructor

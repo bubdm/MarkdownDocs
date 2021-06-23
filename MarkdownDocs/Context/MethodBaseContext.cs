@@ -4,9 +4,8 @@ using System.Linq;
 
 namespace MarkdownDocs.Context
 {
-    public interface IMethodBaseContext
+    public interface IMethodBaseContext : IDocContext
     {
-        string Name { get; set; }
         AccessModifier AccessModifier { get; set; }
         IParameterContext Parameter(int id);
     }

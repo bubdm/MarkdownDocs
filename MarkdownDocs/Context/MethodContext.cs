@@ -4,6 +4,7 @@ namespace MarkdownDocs.Context
 {
     public interface IMethodContext : IMethodBaseContext
     {
+        string? ReturnDescription { get; set; }
         MethodModifier MethodModifier { get; set; }
         void Return(ITypeContext type);
         IMethodMetadata GetMetadata();
@@ -25,5 +26,7 @@ namespace MarkdownDocs.Context
 
         public ITypeMetadata ReturnType { get; private set; } = default!;
         public MethodModifier MethodModifier { get; set; }
+
+        public string? ReturnDescription { get; set; }
     }
 }

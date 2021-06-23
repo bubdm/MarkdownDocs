@@ -43,7 +43,10 @@ namespace MarkdownDocs.Markdown
 
         private void WriteSummary(IPropertyMetadata property)
         {
-
+            if (!string.IsNullOrWhiteSpace(property.Description))
+            {
+                _writer.WriteLine(property.Description);
+            }
         }
     }
 }

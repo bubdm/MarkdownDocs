@@ -2,9 +2,8 @@
 
 namespace MarkdownDocs.Context
 {
-    public interface IPropertyContext
+    public interface IPropertyContext : IDocContext
     {
-        string Name { get; set; }
         string? RawValue { get; set; }
         MethodModifier PropertyModifier { get; set; }
         AccessModifier? GetMethodModifier { get; set; }

@@ -2,10 +2,8 @@
 
 namespace MarkdownDocs.Metadata
 {
-    public interface ITypeMetadata
+    public interface ITypeMetadata : IDocMetadata
     {
-        int Id { get; }
-        string Name { get; }
         string FullName { get; }
         string? Namespace { get; }
         string? Assembly { get; }

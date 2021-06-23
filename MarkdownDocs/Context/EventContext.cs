@@ -2,9 +2,8 @@
 
 namespace MarkdownDocs.Context
 {
-    public interface IEventContext
+    public interface IEventContext : IDocContext
     {
-        string Name { get; set; }
         AccessModifier? RemoveMethodModifier { get; set; }
         AccessModifier? AddMethodModifier { get; set; }
         MethodModifier EventModifier { get; set; }

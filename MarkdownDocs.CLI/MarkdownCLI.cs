@@ -2,6 +2,8 @@
 using MarkdownDocs.Markdown;
 using MarkdownDocs.Metadata;
 using MarkdownDocs.Resolver;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,22 +17,31 @@ namespace MarkdownDocs.CLI
 
     public class MarkdownCLI : IMarkdownCLI
     {
-        private readonly IAssemblyResolver _assemblyResolver;
+        private readonly ICollection<IDocResolver> _assemblyResolvers;
         private readonly IDocsWriter _docsWriter;
+        private readonly Func<IAssemblyContext> _assemblyContextFactory;
 
         public IDocsOptions Options { get; }
 
-        private MarkdownCLI(IDocsOptions options, IAssemblyResolver assemblyResolver, IDocsWriter docsWriter)
+        private MarkdownCLI(IDocsOptions options, IDocsWriter docsWriter, Func<IAssemblyContext> assemblyContextFactory, ICollection<IDocResolver> assemblyResolvers)
         {
             Options = options;
-            _assemblyResolver = assemblyResolver;
+            _assemblyResolvers = assemblyResolvers;
             _docsWriter = docsWriter;
+            _assemblyContextFactory = assemblyContextFactory;
         }
 
         public async Task WriteDocsAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            IAssemblyContext context = await _assemblyResolver.ResolveAsync(Options, cancellationToken).ConfigureAwait(false);
+
+            IAssemblyContext context = _assemblyContextFactory();
+
+            foreach (var assemblyResolver in _assemblyResolvers)
+            {
+                await assemblyResolver.ResolveAsync(context, cancellationToken).ConfigureAwait(false);
+            }
+
             IAssemblyMetadata metadata = context.GetMetadata();
             await _docsWriter.WriteAsync(metadata, Options, cancellationToken).ConfigureAwait(false);
         }
@@ -38,12 +49,23 @@ namespace MarkdownDocs.CLI
         public static IMarkdownCLI New(IDocsOptions options)
         {
             IDocsUrlResolver urlResolver = new DocsUrlResolver(options);
-            IAssemblyContext assemblyContext = new AssemblyContext();
-            IAssemblyResolver assemblyResolver = new AssemblyResolver(assemblyContext, TypeResolverFactory, MethodResolverFactory, ConstructorResolverFactory, FieldResolverFactory, PropertyResolverFactory, EventResolverFactory);
             ISignatureFactory signatureFactory = new SignatureFactory(options, urlResolver);
+            IDocResolver assemblyResolver = new AssemblyResolver(options, TypeResolverFactory, MethodResolverFactory, ConstructorResolverFactory, FieldResolverFactory, PropertyResolverFactory, EventResolverFactory);
+            IXMLMemberResolver xmlMemberResolver = new XMLMemberResolver(urlResolver);
+            IDocResolver xmlResolver = new XMLResolver(options, xmlMemberResolver);
+
+            var resolvers = new List<IDocResolver>
+            {
+                assemblyResolver
+            };
+
+            if (options.UseXML)
+            {
+                resolvers.Add(xmlResolver);
+            }
 
             IDocsWriter docsWriter = new DocsWriter(WriterFactory, TypeWriterFactory);
-            return new MarkdownCLI(options, assemblyResolver, docsWriter);
+            return new MarkdownCLI(options, docsWriter, ContextFactoy, resolvers);
 
             IMetadataWriter<IEventMetadata> EventWriterFactory(IMarkdownWriter writer) => new EventMetaWriter(writer, signatureFactory, urlResolver);
             IMetadataWriter<IPropertyMetadata> PropertyWriterFactory(IMarkdownWriter writer) => new PropertyMetaWriter(writer, signatureFactory, urlResolver);
@@ -51,7 +73,9 @@ namespace MarkdownDocs.CLI
             IMetadataWriter<IParameterMetadata> ParameterWriterFactory(IMarkdownWriter writer) => new ParameterMetaWriter(writer, urlResolver);
             IMetadataWriter<IConstructorMetadata> ConstructorWriterFactory(IMarkdownWriter writer) => new ConstructorMetaWriter(writer, signatureFactory, urlResolver, ParameterWriterFactory);
             IMetadataWriter<IMethodMetadata> MethodWriterFactory(IMarkdownWriter writer) => new MethodMetaWriter(writer, signatureFactory, urlResolver, ParameterWriterFactory);
-            IMetadataWriter<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new TypeMetaWriter(writer, signatureFactory, urlResolver, MethodWriterFactory, ConstructorWriterFactory, FieldWriterFactory, PropertyWriterFactory, EventWriterFactory);
+            IMetadataWriter<ITypeMetadata> TypeWriterFactory(IMarkdownWriter writer) => new TypeMetaWriter(writer, signatureFactory, urlResolver, MethodWriterFactory, ConstructorWriterFactory, FieldWriterFactory, PropertyWriterFactory, EventWriterFactory, ParameterWriterFactory);
+
+            static IAssemblyContext ContextFactoy() => new AssemblyContext();
 
             static IMarkdownWriter WriterFactory(StreamWriter stream) => new MarkdownWriter(stream);
             static IParameterResolver ParameterResolverFactory(IMethodBaseContext context, ITypeResolver typeResolver) => new ParameterResolver(context, typeResolver);

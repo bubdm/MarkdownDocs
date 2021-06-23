@@ -17,6 +17,7 @@ namespace MarkdownDocs.Markdown
         private readonly IMetadataWriter<IFieldMetadata> _fieldWriter;
         private readonly IMetadataWriter<IPropertyMetadata> _propertyWriter;
         private readonly IMetadataWriter<IEventMetadata> _eventWriter;
+        private readonly IMetadataWriter<IParameterMetadata> _parameterWriter;
 
         public TypeMetaWriter(IMarkdownWriter writer,
             ISignatureFactory signatureFactory,
@@ -25,7 +26,8 @@ namespace MarkdownDocs.Markdown
             Func<IMarkdownWriter, IMetadataWriter<IConstructorMetadata>> constructorWriterFactory,
             Func<IMarkdownWriter, IMetadataWriter<IFieldMetadata>> fieldWriterFactory,
             Func<IMarkdownWriter, IMetadataWriter<IPropertyMetadata>> propertyWriterFactory,
-            Func<IMarkdownWriter, IMetadataWriter<IEventMetadata>> eventWriterFactory)
+            Func<IMarkdownWriter, IMetadataWriter<IEventMetadata>> eventWriterFactory,
+            Func<IMarkdownWriter, IMetadataWriter<IParameterMetadata>> parameterWriterFactory)
         {
             _writer = writer;
             _signatureFactory = signatureFactory;
@@ -35,6 +37,7 @@ namespace MarkdownDocs.Markdown
             _fieldWriter = fieldWriterFactory(writer);
             _propertyWriter = propertyWriterFactory(writer);
             _eventWriter = eventWriterFactory(writer);
+            _parameterWriter = parameterWriterFactory(writer);
         }
 
         public async Task WriteAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken = default)
@@ -62,8 +65,39 @@ namespace MarkdownDocs.Markdown
             {
                 await WriteMethodsAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
             }
+            else
+            {
+                await WriteDelegateAsync(type, indent, cancellationToken).ConfigureAwait(false);
+            }
 
             await WriteEventsAsync(type, indent + 1, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task WriteDelegateAsync(ITypeMetadata type, uint indent, CancellationToken cancellationToken)
+        {
+            var invokeMethod = type.Methods.First(m => m.Name == "Invoke");
+            await WriteParametersAsync(invokeMethod, indent, cancellationToken).ConfigureAwait(false);
+
+            if (invokeMethod.ReturnType.Name != typeof(void).Name)
+            {
+                _writer.WriteLine("Returns".Bold());
+                string typeLink = invokeMethod.ReturnType.Link(invokeMethod.Owner, _urlResolver);
+                _writer.WriteLine(typeLink);
+            }
+        }
+
+        private async Task WriteParametersAsync(IMethodMetadata method, uint indent, CancellationToken cancellationToken)
+        {
+            List<IParameterMetadata> parameters = method.Parameters.ToList();
+            if (parameters.Count > 0)
+            {
+                _writer.WriteLine("Parameters".Bold());
+
+                foreach (IParameterMetadata parameter in parameters)
+                {
+                    await _parameterWriter.WriteAsync(parameter, indent, cancellationToken).ConfigureAwait(false);
+                }
+            }
         }
 
         private void WriteSignature(ITypeMetadata type)
@@ -174,7 +208,10 @@ namespace MarkdownDocs.Markdown
 
         private void WriteSummary(ITypeMetadata type)
         {
-
+            if (!string.IsNullOrWhiteSpace(type.Description))
+            {
+                _writer.WriteLine(type.Description);
+            }
         }
 
         private string GetInheritanceChain(ITypeMetadata type)

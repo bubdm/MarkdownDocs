@@ -43,7 +43,10 @@ namespace MarkdownDocs.Markdown
 
         private void WriteSummary(IFieldMetadata field)
         {
-
+            if (!string.IsNullOrWhiteSpace(field.Description))
+            {
+                _writer.WriteLine(field.Description);
+            }
         }
     }
 }

@@ -9,6 +9,8 @@ namespace MarkdownDocs
     public interface IDocsUrlResolver
     {
         string ResolveUrl(ITypeMetadata type);
+        string ResolveUrl(IMemberMetadata member);
+        string ResolveUrl(string member, ITypeMetadata owner);
         string GetTypeName(ITypeMetadata type, bool pretty = false);
         string GetTypeName(ITypeMetadata type, ITypeMetadata root, bool pretty = false);
     }
@@ -16,7 +18,7 @@ namespace MarkdownDocs
     public class DocsUrlResolver : IDocsUrlResolver
     {
         private readonly IDocsOptions _options;
-        
+
         public const string Microsoft = "Microsoft Corporation";
         public const string MicrosoftDocsUrl = "https://docs.microsoft.com/en-us/dotnet/api/";
 
@@ -59,6 +61,51 @@ namespace MarkdownDocs
             }
 
             string link = string.IsNullOrWhiteSpace(baseUrl) ? type.Name : $"{baseUrl}/{type.Name}";
+            return link.Sanitize();
+        }
+
+        public string ResolveUrl(IMemberMetadata member)
+        {
+            ITypeMetadata type = member.Owner;
+            string memberName = member.Name.ToLowerInvariant();
+            string baseUrl = _options.BaseUrl;
+
+            if (!string.IsNullOrWhiteSpace(type.Company))
+            {
+                if (type.Company.Contains(Microsoft, StringComparison.OrdinalIgnoreCase))
+                {
+                    return $"{MicrosoftDocsUrl}{type.FullName}.{memberName}".Sanitize();
+                }
+            }
+
+            if (_options.IsCompact)
+            {
+                return $"#{type.Name}-{type.Category}#{memberName}".Sanitize().ToLowerInvariant();
+            }
+
+            string link = string.IsNullOrWhiteSpace(baseUrl) ? $"{type.Name}#{memberName}" : $"{baseUrl}/{type.Name}#{memberName}";
+            return link.Sanitize();
+        }
+
+        public string ResolveUrl(string member, ITypeMetadata type)
+        {
+            string memberName = member.ToLowerInvariant();
+            string baseUrl = _options.BaseUrl;
+
+            if (!string.IsNullOrWhiteSpace(type.Company))
+            {
+                if (type.Company.Contains(Microsoft, StringComparison.OrdinalIgnoreCase))
+                {
+                    return $"{MicrosoftDocsUrl}{type.FullName}.{memberName}".Sanitize();
+                }
+            }
+
+            if (_options.IsCompact)
+            {
+                return $"#{type.Name}-{type.Category}#{memberName}".Sanitize().ToLowerInvariant();
+            }
+
+            string link = string.IsNullOrWhiteSpace(baseUrl) ? $"{type.Name}#{memberName}" : $"{baseUrl}/{type.Name}#{memberName}";
             return link.Sanitize();
         }
 
